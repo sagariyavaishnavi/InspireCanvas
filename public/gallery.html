@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - InspireCanvas</title>
+    <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body>
+
+    <h2>Artwork Gallery</h2>
+
+    <div class="gallery-container" id="gallery">
+        <!-- Artwork will be dynamically inserted here -->
+    </div>
+
+    <script>
+        
+        async function fetchArtworks() {
+            const response = await fetch("/artworks");
+            const artworks = await response.json();
+
+            const gallery = document.getElementById("gallery");
+            gallery.innerHTML = "";
+
+            artworks.forEach(artwork => {
+                const card = document.createElement("div");
+                card.classList.add("artwork-card");
+
+                card.innerHTML = `
+                    <img src="${artwork.imageUrl}" alt="${artwork.title}">
+                    <h3>${artwork.title}</h3>
+                    <p>By: ${artwork.artist}</p>
+                    <p>Price: $${artwork.price}</p>
+                    <button onclick="addToCart('${artwork._id}')">Add to Cart</button>
+                `;
+
+                gallery.appendChild(card);
+            });
+        }
+
+        function addToCart(artworkId) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push(artworkId);
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert("Artwork added to cart!");
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchArtworks);
+    </script>
+
+</body>
+</html>

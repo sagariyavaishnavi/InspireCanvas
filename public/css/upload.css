@@ -1,0 +1,71 @@
+/* General Styles */
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+}
+
+/* Heading */
+h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Upload Form */
+#uploadForm {
+    background: #ffffff;
+    padding: 25px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Fields */
+#uploadForm input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+/* File Input */
+#uploadForm input[type="file"] {
+    border: none;
+    background: #f9f9f9;
+    padding: 12px;
+    cursor: pointer;
+}
+
+/* Upload Button */
+#uploadForm button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#uploadForm button:hover {
+    background: #0056b3;
+}
+
+/* Responsive Design */
+@media (max-width: 500px) {
+    #uploadForm {
+        width: 95%;
+    }
+}
