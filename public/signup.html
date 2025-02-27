@@ -3,58 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup - InspireCanvas</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/sign-up.css">
+    <title>Sign Up - InspireCanvas</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+        </div>
+    </nav>
 
-    <h2>Signup</h2>
-    <form id="signup-form" method="post" autocomplete="off" action="/api/auth/signup" enctype="application/json">
-        <label>Name: <input type="text" id="name" name="name" autocomplete="new-name" value=""></label>
-        <label>Email: <input type="email" id="email" name="email" autocomplete="new-email" value=""></label>
-        <label>Password: <input type="password" id="password" name="password" autocomplete="new-password" value=""></label>
-        <label>Role:
-            <select id="role">
-                <option value="" disabled selected>Select your role</option>
-                <option value="buyer">Buyer</option>
-                <option value="artist">Artist</option>
-            </select>
-        </label>
-        <button type="submit">Signup</button>
-    </form>
+    <main class="auth-container">
+        <div class="auth-form">
+            <h1>Create Account</h1>
+            <form id="signupForm" action="/api/auth/signup" method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" placeholder="Email" autocomplete="new-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" name="password" placeholder="Password" autocomplete="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="role">I want to join as</label>
+                    <select id="role" name="role" required>
+                        <option value="buyer">Buyer</option>
+                        <option value="artist">Artist</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
+            <p class="auth-link">Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </main>
     <script>
-    document.getElementById("signup-form").addEventListener("submit", async function (event) {
-        event.preventDefault();
+       document.getElementById("signupForm").addEventListener("submit", async function (e) {
+    e.preventDefault(); // Stop form from reloading the page
 
-        const name = document.getElementById("name").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
-        const role = document.getElementById("role").value;
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value; // Buyer/Artist selection
 
-        try {
-            const response = await fetch("/api/auth/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password, role }),
-            });
+    try {
+        const response = await fetch("http://localhost:5000/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password, role }),
+        });
 
-            const data = await response.json();
+        const data = await response.json();
 
-            if (data.success) {
-                localStorage.setItem("signedUp", email); // Save signup status
-                alert(data.message);
-                window.location.href = data.redirect; // Redirect to login page
-            } else {
-                alert(data.error);
-            }
-        } catch (error) {
-            console.error("Signup error:", error);
-            alert("An error occurred. Please try again.");
+        if (response.ok) {
+            alert("✅ Signup successful! Redirecting to login...");
+            window.location.href = "/login.html"; // Redirect after successful signup
+        } else {
+            alert("❌ Signup failed: " + data.message);
         }
-    });
-</script>
+    } catch (error) {
+        console.error("Signup error:", error);
+        alert("❌ Something went wrong!");
+    }
+});
 
+        </script>
+        
 
 </body>
 </html>

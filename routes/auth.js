@@ -1,78 +1,69 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User"); // Import User model
+const User = require("../models/User");  // Import User Model
+
 const router = express.Router();
 
 // Signup Route
 router.post("/signup", async (req, res) => {
-    try {
-      console.log("Received data:", req.body); // Debugging log
-  
-      const { name, email, password, role } = req.body;
-  
-      // Validate required fields
-      if (!name || !email || !password) {
-        return res.status(400).json({ error: "All fields are required!" });
-      }
-  
-      // Check if user already exists
-      let existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ error: "User already exists!" });
-      }
-  
-      // Hash password before saving
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      // Create new user
-      const newUser = new User({
-        name,
-        email,
-        password: hashedPassword,
-        role: role || "buyer", // Default to buyer
-      });
-  
-      // Save user to MongoDB
-      await newUser.save();
-  
-      console.log("User saved:", newUser);
-  
-      // Redirect to login page after successful signup
-      res.json({ success: true, message: "User registered successfully!", redirect: "/login.html" });
-    } catch (error) {
-      console.error("Signup error:", error);
-      res.status(500).json({ error: "Server error" });
-    }
-  });
-  
-
-// Login Route
-router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+      // Extract user details
+      const { name, email, password, role } = req.body;
 
-    // Check if user exists
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
+      // Check if the user already exists (you might have this logic)
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+          return res.status(400).json({ success: false, message: "User already exists!" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Compare hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: "Invalid email or password" });
-    }
+      // Create user with hashed password
+      const newUser = new User({ name, email, password: hashedPassword, role });
+      await newUser.save();
 
-    // Generate JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+      // Check if the request is from a browser form submission
+      if (req.headers.accept && req.headers.accept.includes("text/html")) {
+          return res.redirect("/login.html"); // Redirect user to login page
+      }
 
-    // Redirect to index page after successful login
-    res.json({ success: true, message: "Login successful!", token, redirect: "/index.html" });
+      // If request is from fetch API, return JSON response
+      return res.json({ success: true, message: "User registered successfully!" });
+
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ error: "Server error" });
+      console.error("Signup error:", error);
+      return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+      const user = await User.findOne({ email });
+      if (!user) {
+          return res.status(400).json({ message: "User not found" });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+          return res.status(400).json({ message: "Invalid credentials" });
+      }
+
+      const token = jwt.sign(
+          { id: user._id, name: user.name, role: user.role },
+          process.env.JWT_SECRET,
+          { expiresIn: "1h" }
+      );
+
+      res.json({ token, user: { name: user.name, email: user.email, role: user.role } });
+  } catch (err) {
+      console.error(err);
+      res.status(500).send("Server error");
+  }
+});
+
+
 
 module.exports = router;

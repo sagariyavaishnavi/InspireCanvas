@@ -1,32 +1,34 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
-const Artwork = require("../models/Artwork");
-
+const Artwork = require("../models/Artwork"); // Import Artwork Model
 const router = express.Router();
 
-// Configure multer
+// Multer Storage Setup
 const storage = multer.diskStorage({
-    destination: "./uploads/",
+    destination: "uploads/",
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        cb(null, Date.now() + "-" + file.originalname);
     }
 });
-
 const upload = multer({ storage });
 
-// Upload artwork
+// Upload Artwork Route
 router.post("/", upload.single("image"), async (req, res) => {
     try {
         const { title, price, artist } = req.body;
-        const imageUrl = `/uploads/${req.file.filename}`;
+        if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
-        const newArtwork = new Artwork({ title, price, artist, imageUrl });
+        const newArtwork = new Artwork({
+            title,
+            price,
+            artist,
+            imageUrl: `/uploads/${req.file.filename}`
+        });
+
         await newArtwork.save();
-
-        res.status(201).json({ message: "Artwork uploaded successfully!" });
+        res.status(201).json({ message: "Artwork uploaded successfully", artwork: newArtwork });
     } catch (error) {
-        res.status(500).json({ error: "Error uploading artwork" });
+        res.status(500).json({ message: "Error uploading artwork", error });
     }
 });
 

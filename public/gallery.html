@@ -4,50 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gallery - InspireCanvas</title>
-    <link rel="stylesheet" href="css/gallery.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/gallery.css">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="gallery.html" class="active">Gallery</a>
+            <a href="upload.html">Upload</a>
+            <div id="authLinks">
+                <a href="login.html">Login</a>
+                <a href="signup.html" class="btn-primary">Sign Up</a>
+            </div>
+            <div id="userMenu" class="hidden">
+                <a href="dashboard.html" id="userNameDisplay"></a>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
 
-    <h2>Artwork Gallery</h2>
+    <main class="gallery-container">
+        <div class="gallery-header">
+            <h1>Art Gallery</h1>
+            <div class="gallery-filters">
+                <select id="sortFilter" class="filter-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="priceHigh">Price: High to Low</option>
+                    <option value="priceLow">Price: Low to High</option>
+                </select>
+            </div>
+        </div>
 
-    <div class="gallery-container" id="gallery">
-        <!-- Artwork will be dynamically inserted here -->
-    </div>
+        <div class="gallery-grid" id="artworkGrid">
+            <!-- Artwork cards will be loaded here by JavaScript -->
+        </div>
 
+        <!-- Artwork Modal -->
+        <div id="artworkModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="modal-artwork">
+                    <img id="modalImage" src="" alt="Artwork">
+                    <div class="modal-info">
+                        <h2 id="modalTitle"></h2>
+                        <p id="modalArtist"></p>
+                        <p id="modalPrice" class="price"></p>
+                        <div class="modal-buttons">
+                            <button class="btn-primary" id="buyNowBtn">Buy Now</button>
+                            <button class="btn-secondary" id="addToCartBtn">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 InspireCanvas. All rights reserved.</p>
+    </footer>
     <script>
-        
-        async function fetchArtworks() {
-            const response = await fetch("/artworks");
-            const artworks = await response.json();
+        async function fetchGallery() {
+            try {
+                const response = await fetch("/api/artworks");
+                const artworks = await response.json();
 
-            const gallery = document.getElementById("gallery");
-            gallery.innerHTML = "";
-
-            artworks.forEach(artwork => {
-                const card = document.createElement("div");
-                card.classList.add("artwork-card");
-
-                card.innerHTML = `
-                    <img src="${artwork.imageUrl}" alt="${artwork.title}">
-                    <h3>${artwork.title}</h3>
-                    <p>By: ${artwork.artist}</p>
-                    <p>Price: $${artwork.price}</p>
-                    <button onclick="addToCart('${artwork._id}')">Add to Cart</button>
-                `;
-
-                gallery.appendChild(card);
-            });
+                const galleryContainer = document.getElementById("gallery-container");
+                galleryContainer.innerHTML = artworks.map(art => `
+                    <div class="art-item">
+                        <img src="${art.imageUrl}" alt="${art.title}" width="200">
+                        <h3>${art.title}</h3>
+                        <p>Price: $${art.price}</p>
+                        <p>Artist: ${art.artist}</p>
+                    </div>
+                `).join("");
+            } catch (error) {
+                console.error("Error fetching gallery:", error);
+            }
         }
 
-        function addToCart(artworkId) {
-            let cart = JSON.parse(localStorage.getItem("cart")) || [];
-            cart.push(artworkId);
-            localStorage.setItem("cart", JSON.stringify(cart));
-            alert("Artwork added to cart!");
-        }
-
-        document.addEventListener("DOMContentLoaded", fetchArtworks);
+        fetchGallery();
     </script>
-
+    
 </body>
 </html>

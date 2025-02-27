@@ -3,41 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Artwork</title>
-    <link rel="stylesheet" href="css/upload.css">
+    <title>Upload Artwork - InspireCanvas</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/upload.css">
 </head>
 <body>
-    <h2>Upload Your Artwork</h2>
-    <form id="uploadForm" enctype="multipart/form-data">
-        <input type="text" id="title" placeholder="Title" required><br>
-        <input type="number" id="price" placeholder="Price" required><br>
-        <input type="text" id="artist" placeholder="Artist Name" required><br>
-        <input type="file" id="image" accept="image/*" required><br>
-        <button type="submit">Upload</button>
-    </form>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="upload.html" class="active">Upload</a>
+            <div id="userMenu">
+                <a href="dashboard.html" id="userNameDisplay"></a>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="upload-container">
+        <h1>Upload Your Artwork</h1>
+        <form id="uploadForm" class="upload-form">
+            <div class="form-group">
+                <label for="title">Artwork Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="price">Price ($)</label>
+                <input type="number" id="price" name="price" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="artist">Artist name</label>
+                <input type="text" id="artist" name="artist" required>
+
+            </div>
+            <div class="form-group">
+                <label for="artwork">Artwork File</label>
+                <input type="file" id="artwork" name="artwork" accept="image/*" required>
+                <div id="preview" class="image-preview"></div>
+            </div>
+            <button type="submit" class="btn-primary">Upload Artwork</button>
+        </form>
+    </main>
     <script>
-        document.getElementById("uploadForm").addEventListener("submit", async (event) => {
-            event.preventDefault();
-            const formData = new FormData();
-            formData.append("title", document.getElementById("title").value);
-            formData.append("price", document.getElementById("price").value);
-            formData.append("artist", document.getElementById("artist").value);
-            formData.append("image", document.getElementById("image").files[0]);
-
-            const token = localStorage.getItem("token");
-            const response = await fetch("/upload", {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-                body: formData
-            });
-
-            if (response.ok) {
-                alert("Artwork uploaded successfully!");
-                window.location.href = "gallery.html";
-            } else {
-                alert("Upload failed!");
-            }
-        });
+        document.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+    
+        if (!user || user.role !== "artist") {
+            alert("Only artists can upload artwork!");
+            window.location.href = "gallery.html"; // Redirect to gallery if not an artist
+        }
+    });
     </script>
+
+  
 </body>
 </html>

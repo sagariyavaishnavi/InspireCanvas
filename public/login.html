@@ -4,52 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - InspireCanvas</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+        </div>
+    </nav>
 
-    <h2>Login</h2>
-    <form id="loginForm" action="/api/auth/login" method="POST">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        
-        <button type="submit">Login</button>
-    </form>
-    
-
+    <main class="auth-container">
+        <div class="auth-form">
+            <h1>Welcome Back</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="Email" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" autocomplete="new-password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <p class="auth-link">Don't have an account? <a href="signup.html">Sign up here</a></p>
+        </div>
+    </main>
     <script>
-        document.getElementById("loginForm").addEventListener("submit", async function (event) {
-            event.preventDefault();
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
         
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-        
-            try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, password }),
-                });
-        
-                const data = await response.json();
-        
-                if (data.success) {
-                    alert(data.message);
-                    localStorage.setItem("token", data.token); // Store token
-                    window.location.href = data.redirect; // Redirect to index
-                } else {
-                    alert(data.error);
-                }
-            } catch (error) {
-                console.error("Login error:", error);
-                alert("An error occurred.");
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+    
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+    
+            const data = await res.json();
+            if (res.ok) {
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("user", JSON.stringify(data.user));
+    
+                alert("Login successful!");
+                window.location.href = "dashboard.html"; // Redirect to Dashboard
+            } else {
+                alert(data.message);
             }
-        });
-        </script>
-        
+        } catch (error) {
+            console.error("Login failed:", error);
+        }
+    });
+    
+    </script>
+
 </body>
 </html>

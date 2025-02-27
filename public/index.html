@@ -3,34 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>InspireCanvas - Home</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>InspireCanvas - Digital Art Marketplace</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/home.css">
 </head>
 <body>
-    <header>
-        <h1 class="logo">InspireCanvas</h1>
-        <nav>
-            <a href="index.html">Home</a>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html" class="active">Home</a>
             <a href="gallery.html">Gallery</a>
-            <a href="signup.html">Signup</a>
-            <a href="login.html">Login</a>
             <a href="upload.html">Upload</a>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Discover & Buy Stunning Artwork</h1>
-            <p>A platform where creativity meets art lovers. Explore, showcase, and buy amazing artwork!</p>
-            <div class="hero-buttons">
-                <a href="gallery.html" class="btn">Explore Gallery</a>
-                <a href="signup.html" class="btn btn-alt">Lets Connect</a>
+            <div id="authLinks">
+                <a href="login.html">Login</a>
+                <a href="signup.html" class="btn-primary">Sign Up</a>
+            </div>
+            <div id="userMenu" class="hidden">
+                <a href="dashboard.html" id="userNameDisplay"></a>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
             </div>
         </div>
-    </section>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Discover Unique Digital Art</h1>
+                <p>Connect with talented artists, explore stunning digital artwork, and build your collection on InspireCanvas.</p>
+                <div class="cta-buttons">
+                    <a href="gallery.html" class="btn-primary">Explore Gallery</a>
+                    <a href="signup.html" class="btn-secondary">Join Us</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="images/art4.jpg" alt="Digital art showcase">
+            </div>
+        </section>
+
+        <section class="trending">
+            <h2>Trending Artworks</h2>
+            <div class="artwork-grid" id="trendingArtworks">
+                <!-- Artwork cards will be inserted here by JavaScript -->
+            </div>
+        </section>
+    </main>
 
     <footer>
-        <p>&copy; 2025 InspireCanvas. All rights reserved.</p>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <div class="nav-brand">InspireCanvas</div>
+                <p>Your premier marketplace for digital art</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h3>Explore</h3>
+                    <ul>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="upload.html">Upload Artwork</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Account</h3>
+                    <ul>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Support Cell</h3>
+                    <ul>
+                        <li><a href="terms.html">Terms & Conditions</a></li>
+                        <li><a href="contact.html">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 InspireCanvas. All rights reserved.</p>
+        </div>
     </footer>
+    <script src="./js/home.js"></script>
+
 </body>
 </html>
+

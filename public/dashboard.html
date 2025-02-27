@@ -3,19 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Artist Dashboard - InspireCanvas</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Dashboard - InspireCanvas</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
 <body>
-    <h2>Manage Your Artwork</h2>
-    <form id="upload-form">
-        <label>Title: <input type="text" id="title"></label>
-        <label>Description: <input type="text" id="description"></label>
-        <label>Price: <input type="number" id="price"></label>
-        <label>Image: <input type="file" id="image"></label>
-        <button type="submit">Upload</button>
-    </form>
-    <div id="artist-gallery"></div>
-    <script src="js/script.js"></script>
+    <nav class="navbar">
+        <div class="nav-brand">InspireCanvas</div>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="gallery.html">Gallery</a>
+            <a href="upload.html">Upload</a>
+            <div id="userMenu">
+                <a href="dashboard.html" id="userNameDisplay" class="active"></a>
+                <button id="logoutBtn" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <div class="dashboard-sidebar">
+            <h2>My Account</h2>
+            <ul class="dashboard-menu">
+                <li><a href="#profile" class="active">Profile Settings</a></li>
+                <li><a href="#artworks">My Artworks</a></li>
+                <li><a href="#purchases">Purchase History</a></li>
+            </ul>
+        </div>
+
+        <div class="dashboard-content">
+            <section id="profile" class="dashboard-section">
+                <h2>Profile Settings</h2>
+                <form id="profileForm" class="profile-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword">
+                    </div>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </form>
+            </section>
+
+            <section id="artworks" class="dashboard-section hidden">
+                <h2>My Artworks</h2>
+                <div class="artwork-grid" id="userArtworks">
+                    <!-- User's artworks will be loaded here -->
+                </div>
+            </section>
+
+            <section id="purchases" class="dashboard-section hidden">
+                <h2>Purchase History</h2>
+                <div class="purchase-list" id="purchaseHistory">
+                    <!-- Purchase history will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userMenu = document.getElementById("userMenu");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userNameDisplay = document.getElementById("userNameDisplay");
+    
+        if (user) {
+            userNameDisplay.textContent = user.name;
+            userMenu.style.display = "block";
+        } else {
+            window.location.href = "login.html"; // Redirect if not logged in
+        }
+    
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            window.location.href = "index.html";
+        });
+    });
+    </script>
+
+   
 </body>
 </html>
