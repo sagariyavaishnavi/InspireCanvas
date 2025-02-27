@@ -5,21 +5,21 @@ const trendingArtworks = [
         title: 'Krishna',
         artist: 'Heni K. Mehta',
         price: 499,
-        imageUrl:  'images/art1.jpg'
+        imageUrl:  '/public/images/art1.jpg'
     },
     {
         id: '2',
         title: 'Sun set',
         artist: 'Heni K. Mehta',
         price: 399,
-        imageUrl: 'images/art2.jpg'
+        imageUrl: '/public/images/art2.jpg'
     },
     {
         id: '3',
         title: 'Tom - Jerry',
         artist: 'Heni K. Mehta',
         price: 449,
-        imageUrl: 'images/art3.jpg'
+        imageUrl: 'public/images/art3.jpg'
     }
 ];
 
