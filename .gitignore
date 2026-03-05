@@ -1,58 +1,42 @@
-# Node.js dependencies
+# Dependencies
 node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+build/
+dist/
+.next/
+out/
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-images/
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.svg
-*.webp
-*.bmp
-
-
-# Environment variables
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-
-# Logs
-logs
-*.log
-log/
-logs/
-debug.log
-npm-debug.log
-yarn-debug.log
-pnpm-debug.log
-lerna-debug.log
-
-# OS-specific files
-.DS_Store
-Thumbs.db
-
-# IDE/Editor files
+# IDE / Editor
 .vscode/
+.git/
 .idea/
 *.swp
 *.swo
 
-# Build artifacts
-dist/
-build/
-coverage/
-.cache/
-out/
+# OS
+.DS_Store
+Thumbs.db
 
-# Miscellaneous
-*.bak
-*.tmp
-*.pid
-*.seed
-*.lock
+# Project Specific
+backend/node_modules/
+frontend/node_modules/
+backend/.env
+frontend/.env

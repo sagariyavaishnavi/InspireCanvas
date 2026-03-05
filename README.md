@@ -1,30 +1,103 @@
-# InspireCanvas
+# 🎨 InspireCanvas
 
-## Drawing Gallery Platform : Description
+InspireCanvas is a modern, full-stack digital art marketplace built using the MERN stack. It provides a platform for artists to showcase and manage their portfolios while allowing buyers to explore, collect, and purchase unique digital masterpieces.
 
-The **InspireCanvas** is a simple and user-friendly website where artists can upload and display their artwork. It provides art enthusiasts with a seamless browsing experience, enabling them to view, add items to a shopping cart, and simulate purchases. This project is ideal for showcasing creative work and fostering connections between artists and buyers.
+## ✨ Features
 
-## How It Works
-1. **For Artists**:
-   - Upload images of drawings along with details like title, description, and price.
-   - The uploaded artwork is displayed on the homepage for users to browse.
+### 👨‍🎨 Artist Features
+- **Comprehensive Dashboard:** Monitor total pieces, active listings, and drafts at a glance.
+- **Artwork Management:** Full CRUD (Create, Read, Update, Delete) functionality for artworks.
+- **Draft System:** Save works-in-progress as drafts before publishing them to the public gallery.
+- **Secure Uploads:** Seamless image uploading via Cloudinary with automatic resizing and optimization.
+- **Custom Notifications:** In-app confirmation modals for critical actions like deletion for a premium user experience.
 
-2. **For Users**:
-   - Browse through a collection of drawings on the homepage.
-   - Click "Add to Cart" to select items you wish to purchase.
-   - View selected items in the cart and see the total price.
-   - Simulate a checkout process to complete the purchase.
+### 🛍️ Buyer Features
+- **Discovery Gallery:** Explore a wide range of digital art categories with real-time searching and filtering.
+- **Product Details:** High-resolution previews and detailed artist information.
+- **Shopping Cart:** Add items to cart and manage purchases easily.
+- **Role-based Access:** Dedicated interfaces tailored to buyer needs.
 
+### 🔐 Platform Core
+- **Persistent Authentication:** Stay logged in across browser sessions with verified JWT tokens.
+- **Mobile Responsive:** Fully optimized for all devices, from mobile phones to high-resolution desktops.
+- **Modern UI:** Built with Framer Motion for smooth animations and a premium glassmorphic aesthetic.
 
+---
 
-## Features
-- **Gallery**: Showcases artwork with titles, prices, and images.
-- **Cart System**: Enables adding, viewing, and simulating purchases.
-- **Responsive Design**: Looks great on any device (desktop, tablet, or mobile).
-- **Simple Artist Upload**: Artists can add new drawings to the gallery.
+## 🚀 Tech Stack
 
-## Technologies Used
-- **HTML**: Structure of the web pages.
-- **CSS**: Styling and layout design.
-- **JavaScript**: Adding interactivity and dynamic functionality.
+- **Frontend:** React, Vite, Framer Motion, Lucide Icons, Axios, React Router
+- **Backend:** Node.js, Express.js, MongoDB (Mongoose)
+- **Authentication:** JSON Web Tokens (JWT) & BCryptjs
+- **Media Management:** Cloudinary API
+- **Styling:** Vanilla CSS (Custom tokens & Glassmorphism)
 
+---
+
+## 🛠️ Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/InspireCanvas.git
+cd InspireCanvas
+```
+
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+```
+Create a `.env` file in the `backend/` folder and add:
+```env
+PORT= port_number
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+### 3. Frontend Setup
+```bash
+cd ../frontend
+npm install
+```
+---
+
+## 🏁 Running the Application
+
+### Start Backend
+```bash
+cd backend
+npm run dev
+```
+
+### Start Frontend
+```bash
+cd frontend
+npm run dev
+```
+---
+
+## 📂 Project Structure
+
+```text
+InspireCanvas/
+├── backend/          # Node.js + Express + MongoDB
+│   ├── controllers/  # API Logic
+│   ├── models/       # Database Schemas
+│   ├── routes/       # API Endpoints
+│   └── middleware/   # Auth & Upload filters
+├── frontend/         # React + Vite
+│   ├── src/
+│   │   ├── components/ # Reusable UI
+│   │   ├── context/    # Global State (Auth)
+│   │   ├── pages/      # View layouts
+│   │   └── services/   # API communication
+└── README.md         # Documentation
+```
+
+---
+
+## 👋 Contact
+Developed by **Vaishnavi Sagariya** - [GitHub](https://github.com/sagariyavaishnavi)
