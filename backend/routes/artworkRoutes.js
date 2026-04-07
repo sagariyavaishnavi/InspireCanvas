@@ -16,7 +16,7 @@ router.route('/')
 
 router.route('/:id')
     .get(getArtworkById)
-    .put(protect, authorize('artist'), updateArtwork)
+    .put(protect, authorize('artist'), upload.single('image'), updateArtwork)
     .delete(protect, authorize('artist'), deleteArtwork);
 
 module.exports = router;

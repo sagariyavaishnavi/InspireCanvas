@@ -7,8 +7,9 @@ import api from '../services/api';
 const ExplorePage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [priceRange, setPriceRange] = useState(50000); // Changed to INR range
+    const [priceRange, setPriceRange] = useState(50000); 
     const [artworks, setArtworks] = useState([]);
+    const [categories, setCategories] = useState(['All']);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,6 +17,8 @@ const ExplorePage = () => {
             try {
                 const res = await api.get('/artworks');
                 setArtworks(res.data);
+                const uniqueCategories = ['All', ...new Set(res.data.map(art => art.category))].filter(Boolean);
+                setCategories(uniqueCategories);
             } catch (error) {
                 console.error('Error fetching artworks:', error);
             } finally {
@@ -25,7 +28,7 @@ const ExplorePage = () => {
         fetchArtworks();
     }, []);
 
-    const categories = ['All', 'Paintings', 'Photography', '3D Art', 'Illustrations', 'Digital Art'];
+    // Filter artworks based on state
 
     // Filter artworks based on state
     const filteredArtworks = artworks.filter(art => {
@@ -118,7 +121,7 @@ const ExplorePage = () => {
                                 <div style={{ position: 'relative', height: '320px' }}>
                                     <img src={art.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={art.title} />
                                     <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.95)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>
-                                        ₹{art.price}
+                                        ₹{art.price ? Math.floor(Number(art.price)).toLocaleString() : '0'}
                                     </div>
                                     <div style={{ position: 'absolute', bottom: '16px', left: '16px', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', color: 'white', fontWeight: 600 }}>
                                         {art.category}
@@ -129,13 +132,17 @@ const ExplorePage = () => {
                                 <div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                         <h3 style={{ fontSize: '20px' }}>{art.title}</h3>
-                                        <button style={{ color: 'var(--text-light)', background: 'none', border: 'none', cursor: 'pointer' }}><Search size={18} /></button>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--primary-coral)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold' }}>
-                                            {art.artist?.name ? art.artist.name.charAt(0).toUpperCase() : 'U'}
+                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--primary-coral)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', overflow: 'hidden' }}>
+                                            {art.artist?.avatar ? <img src={art.artist.avatar} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : (art.artist?.name ? art.artist.name.charAt(0).toUpperCase() : 'U')}
                                         </div>
-                                        <span style={{ fontSize: '14px', color: 'var(--text-gray)' }}>by <strong>@{art.artist?.name || 'Unknown'}</strong></span>
+                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <span style={{ fontSize: '14px', color: 'var(--text-gray)' }}>by <strong>@{art.artist?.name || 'Unknown'}</strong></span>
+                                            {art.artist?.brandLogo && (
+                                                <img src={art.artist.brandLogo} style={{ height: '18px', opacity: 0.8 }} title="Artist Brand" />
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>

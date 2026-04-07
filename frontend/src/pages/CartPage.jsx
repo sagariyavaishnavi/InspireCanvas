@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,17 +35,11 @@ const CartPage = () => {
     };
 
     const handleCheckout = () => {
-        if (!user) {
-            alert("Please login first to proceed to checkout!");
-            navigate('/login');
-            return;
-        }
         navigate('/checkout');
     };
 
     const subtotal = cartItems.reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0);
-    const platformFee = cartItems.length > 0 ? 50.00 : 0; // ₹50 flat platform fee
-    const total = subtotal + platformFee;
+    const total = subtotal;
 
     return (
         <motion.div
@@ -62,13 +56,15 @@ const CartPage = () => {
                     {cartItems.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                             {cartItems.map((item) => (
-                                <div key={item._id} className="glass cart-item" style={{ display: 'flex', gap: '24px', padding: '24px', borderRadius: 'var(--radius-md)', background: 'white' }}>
+                                <div key={item._id} className="glass cart-item" style={{ position: 'relative', display: 'flex', gap: '24px', padding: '24px', borderRadius: 'var(--radius-md)', background: 'white' }}>
+                                    <button onClick={() => removeItem(item._id)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>
+                                        <X size={18} />
+                                    </button>
                                     <img src={item.image} style={{ width: '120px', height: '120px', borderRadius: '12px', objectFit: 'cover' }} />
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                                 <h3 style={{ fontSize: '20px' }}>{item.title}</h3>
-                                                <button onClick={() => removeItem(item._id)} style={{ color: '#EF4444', background: 'none' }}><Trash2 size={18} /></button>
                                             </div>
                                             <p style={{ color: 'var(--text-gray)', fontSize: '14px', marginBottom: '16px' }}>by {item.artist?.name || 'Unknown'}</p>
                                         </div>
@@ -105,10 +101,6 @@ const CartPage = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ color: 'var(--text-gray)' }}>Subtotal</span>
                                 <span style={{ fontWeight: 700 }}>₹{subtotal.toLocaleString()}</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span style={{ color: 'var(--text-gray)' }}>Platform Fee</span>
-                                <span style={{ fontWeight: 700 }}>₹{platformFee.toLocaleString()}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ color: 'var(--text-gray)' }}>Estimated Taxes</span>

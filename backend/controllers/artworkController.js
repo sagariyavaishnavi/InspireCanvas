@@ -3,8 +3,9 @@ const Artwork = require('../models/Artwork');
 // Create Artwork
 exports.createArtwork = async (req, res, next) => {
     try {
-        const { title, description, price, category, tags, status } = req.body;
+        const { title, description, price, category, tags, status, size, material, subject, medium, shape } = req.body;
         const image = req.file ? req.file.path : null;
+        const sku = `IC_${category.substring(0,3).toUpperCase()}_${Math.floor(100000 + Math.random() * 900000)}`;
 
         if (!image) {
             return res.status(400).json({ message: 'Please upload an image' });
@@ -18,7 +19,13 @@ exports.createArtwork = async (req, res, next) => {
             image,
             artist: req.user._id,
             tags: tags ? JSON.parse(tags) : [],
-            status: status || 'active'
+            status: status || 'active',
+            size,
+            material,
+            subject,
+            medium,
+            shape,
+            sku
         });
 
         res.status(201).json(artwork);
@@ -67,7 +74,7 @@ exports.getArtworks = async (req, res, next) => {
             ];
         }
 
-        const artworks = await Artwork.find(query).populate('artist', 'name email avatar');
+        const artworks = await Artwork.find(query).populate('artist', 'name email avatar brandLogo');
         res.status(200).json(artworks);
     } catch (error) {
         next(error);
@@ -77,7 +84,7 @@ exports.getArtworks = async (req, res, next) => {
 // Get Single Artwork
 exports.getArtworkById = async (req, res, next) => {
     try {
-        const artwork = await Artwork.findById(req.params.id).populate('artist', 'name bio avatar');
+        const artwork = await Artwork.findById(req.params.id).populate('artist', 'name bio avatar brandLogo');
         if (!artwork) {
             return res.status(404).json({ message: 'Artwork not found' });
         }
@@ -103,7 +110,12 @@ exports.updateArtwork = async (req, res, next) => {
             return res.status(401).json({ message: 'User not authorized to update this artwork' });
         }
 
-        artwork = await Artwork.findByIdAndUpdate(req.params.id, req.body, {
+        const updateData = { ...req.body };
+        if (req.file) {
+            updateData.image = req.file.path;
+        }
+
+        artwork = await Artwork.findByIdAndUpdate(req.params.id, updateData, {
             new: true,
             runValidators: true
         });

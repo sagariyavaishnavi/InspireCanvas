@@ -16,8 +16,7 @@ const artworkSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: [true, 'Artwork must belong to a category'],
-        enum: ['Paintings', 'Photography', '3D Art', 'Illustrations', 'Digital Art', 'Abstract', 'Other']
+        required: [true, 'Artwork must belong to a category']
     },
     image: {
         type: String,

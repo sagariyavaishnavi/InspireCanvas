@@ -81,7 +81,7 @@ const ArtworkDetail = () => {
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                         <span style={{ background: '#E9FAF0', color: '#10B981', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>
-                            {artwork.category || 'Digital Art'}
+                            {artwork.category || 'HandWork'}
                         </span>
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button style={{ padding: '8px', borderRadius: '50%', background: 'white', border: '1px solid #EEE', cursor: 'pointer' }}><Heart size={20} color="var(--primary-coral)" /></button>
@@ -90,19 +90,26 @@ const ArtworkDetail = () => {
                     </div>
 
                     <h1 style={{ fontSize: '48px', marginBottom: '8px', wordBreak: 'break-word' }}>{artwork.title}</h1>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--primary-coral)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: 'bold' }}>
-                            {artwork.artist?.name ? artwork.artist.name.charAt(0).toUpperCase() : 'U'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', overflow: 'hidden' }}>
+                            {artwork.artist?.avatar ? <img src={artwork.artist.avatar} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : (artwork.artist?.name ? artwork.artist.name.charAt(0).toUpperCase() : 'U')}
                         </div>
-                        <p style={{ fontSize: '18px' }}>by <span style={{ color: 'var(--soft-purple)', fontWeight: 700 }}>{artwork.artist?.name || 'Unknown Artist'}</span></p>
+                        <div style={{ flex: 1 }}>
+                            <p style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                by <span style={{ color: 'var(--soft-purple)', fontWeight: 700 }}>{artwork.artist?.name || 'Unknown Artist'}</span>
+                                {artwork.artist?.brandLogo && (
+                                    <img src={artwork.artist.brandLogo} style={{ height: '24px', borderRadius: '4px', border: '1px solid #EEE' }} title="Artist Brand" />
+                                )}
+                            </p>
+                        </div>
                     </div>
 
                     <div className="glass" style={{ padding: '32px', borderRadius: 'var(--radius-md)', marginBottom: '32px', background: 'var(--bg-cream)' }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px' }}>
-                            <span style={{ fontSize: '36px', fontWeight: 800 }}>₹{artwork.price?.toLocaleString()}</span>
+                            <span style={{ fontSize: '36px', fontWeight: 800 }}>₹{artwork.price ? Math.floor(Number(artwork.price)).toLocaleString() : '0'}</span>
                         </div>
                         <p style={{ color: 'var(--highlight-green)', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            Free digital delivery
+                            Free shipping across India
                         </p>
                     </div>
 
@@ -127,7 +134,7 @@ const ArtworkDetail = () => {
                         </div>
                         <div style={{ textAlign: 'center' }}>
                             <RefreshCw size={20} color="var(--soft-purple)" style={{ marginBottom: '8px' }} />
-                            <p style={{ fontSize: '11px', fontWeight: 600 }}>Instant Access</p>
+                            <p style={{ fontSize: '11px', fontWeight: 600 }}>Home Delivery</p>
                         </div>
                     </div>
                 </div>

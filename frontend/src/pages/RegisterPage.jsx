@@ -155,7 +155,10 @@ const RegisterPage = () => {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
-                                    minLength="6"
+                                    minLength="8"
+                                    maxLength="16"
+                                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,16}$"
+                                    title="Password must be 8-16 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
                                 />
                             </div>
                         </div>

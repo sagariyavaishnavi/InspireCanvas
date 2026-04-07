@@ -17,7 +17,8 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please provide a password'],
-        minlength: 6,
+        minlength: 8,
+        maxlength: 16,
         select: false
     },
     role: {
@@ -27,7 +28,11 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: String,
-        default: 'default-avatar.jpg'
+        default: ''
+    },
+    brandLogo: {
+        type: String,
+        default: ''
     },
     bio: {
         type: String,

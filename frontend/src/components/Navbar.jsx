@@ -37,7 +37,7 @@ const Navbar = () => {
                     }} style={{ fontWeight: 500 }}>How it Works</a>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     <div className="glass search-bar" style={{ display: 'flex', alignItems: 'center', padding: '8px 16px', borderRadius: 'var(--radius-full)', background: 'white' }}>
                         <Search size={18} color="#9CA3AF" />
                         <input
@@ -53,22 +53,22 @@ const Navbar = () => {
                     </Link>
 
                     {user ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                            <Link to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--text-dark)' }}>
-                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold' }}>
-                                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <Link to="/dashboard" className="nav-user-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: 'var(--text-dark)' }}>
+                                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 'bold', overflow: 'hidden', border: '2px solid white', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                                    {user.avatar ? <img src={user.avatar} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (user.name ? user.name.charAt(0).toUpperCase() : 'U')}
                                 </div>
-                                <span style={{ fontWeight: 600, fontSize: '14px' }}>{user.name}</span>
+                                <span className="nav-user-name" style={{ fontWeight: 600, fontSize: '14px' }}>{user.name}</span>
                             </Link>
                             <button onClick={logout} style={{ background: 'none', border: 'none', color: 'var(--text-gray)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '8px' }} title="Logout">
                                 <LogOut size={20} />
                             </button>
                         </div>
                     ) : (
-                        <>
+                        <div className="nav-auth-buttons" style={{ display: 'flex', gap: '8px' }}>
                             <Link to="/login" className="btn-secondary" style={{ padding: '8px 20px', fontSize: '14px' }}>Login</Link>
-                            <Link to="/register" className="btn-primary" style={{ padding: '8px 20px', fontSize: '14px' }}>Join as Artist</Link>
-                        </>
+                            <Link to="/register" className="btn-primary" style={{ padding: '8px 20px', fontSize: '14px' }}>Join</Link>
+                        </div>
                     )}
                 </div>
             </div>

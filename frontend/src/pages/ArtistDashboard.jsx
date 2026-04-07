@@ -33,7 +33,9 @@ const ArtistDashboard = () => {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [artworks, setArtworks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { user, logout } = useAuth();
+    const [deletableId, setDeletableId] = useState(null);
+    const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const { user, logout, updateUserData } = useAuth();
     const navigate = useNavigate();
 
     // Upload Form State
@@ -42,11 +44,27 @@ const ArtistDashboard = () => {
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState('');
     const [uploadSuccess, setUploadSuccess] = useState('');
+    const [existingImage, setExistingImage] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [editingId, setEditingId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [deletableId, setDeletableId] = useState(null);
+
+    // Settings State
+    const [settingsData, setSettingsData] = useState({
+        name: user?.name || '',
+        bio: user?.bio || '',
+        avatar: user?.avatar || '',
+        brandLogo: user?.brandLogo || ''
+    });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [logoFile, setLogoFile] = useState(null);
+    const [savingSettings, setSavingSettings] = useState(false);
+
+    const showMessage = (msg, type = 'success') => {
+        setNotification({ show: true, message: msg, type });
+        setTimeout(() => setNotification({ show: false, message: '', type: 'success' }), 5000);
+    };
 
     useEffect(() => {
         if (!user) {
@@ -80,7 +98,7 @@ const ArtistDashboard = () => {
             formData.append('title', uploadData.title);
             formData.append('description', uploadData.description);
             formData.append('category', uploadData.category);
-            formData.append('price', uploadData.price);
+            formData.append('price', Number(uploadData.price));
             formData.append('status', status);
             if (imageFile) {
                 formData.append('image', imageFile);
@@ -104,6 +122,7 @@ const ArtistDashboard = () => {
                 setUploadData({ title: '', description: '', category: 'Digital Art', price: '' });
                 setImageFile(null);
                 setEditingId(null);
+                setExistingImage(null);
             }, 1000);
         } catch (error) {
             setUploadError(error.response?.data?.message || 'Upload Failed. Please try again or check photo size.');
@@ -117,6 +136,14 @@ const ArtistDashboard = () => {
         submitArtwork('active');
     };
 
+    const handleSecondaryAction = () => {
+        if (!uploadData.title || !uploadData.description || !uploadData.price) {
+            setUploadError('Please fill missing fields before saving a draft.');
+            return;
+        }
+        submitArtwork('draft');
+    };
+
     const handleEdit = (art) => {
         setEditingId(art._id);
         setUploadData({
@@ -125,6 +152,7 @@ const ArtistDashboard = () => {
             category: art.category,
             price: art.price
         });
+        setExistingImage(art.image);
         // Note: For editing, we don't automatically download the file back to the input, 
         // we'll treat a null imageFile as "don't change the existing photo"
         setActiveTab('upload');
@@ -150,9 +178,48 @@ const ArtistDashboard = () => {
             setArtworks(artworks.filter(art => art._id !== deletableId));
             setShowDeleteModal(false);
             setDeletableId(null);
+            showMessage('Artwork deleted successfully!', 'success');
         } catch (err) {
             console.error(err);
-            alert('Failed to delete artwork.');
+            showMessage('Failed to delete artwork.', 'error');
+        }
+    };
+
+    const handleSaveSettings = async (e) => {
+        e.preventDefault();
+        setSavingSettings(true);
+        try {
+            const formData = new FormData();
+            formData.append('name', settingsData.name);
+            formData.append('bio', settingsData.bio);
+            if (avatarFile) formData.append('avatar', avatarFile);
+            if (logoFile) formData.append('brandLogo', logoFile);
+
+            const res = await api.put('/auth/update-profile', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+
+            updateUserData(res.data);
+            showMessage('Profile updated successfully!', 'success');
+            setAvatarFile(null);
+            setLogoFile(null);
+        } catch (err) {
+            console.error(err);
+            showMessage('Failed to update profile.', 'error');
+        } finally {
+            setSavingSettings(false);
+        }
+    };
+
+    const handleRemovePhoto = async (type) => {
+        try {
+            const fieldKey = type === 'avatar' ? 'avatar' : 'brandLogo';
+            const res = await api.put('/auth/update-profile', { [fieldKey]: '' });
+            updateUserData(res.data);
+            setSettingsData({ ...settingsData, [fieldKey]: '' });
+            showMessage(`${type === 'avatar' ? 'Profile photo' : 'Brand logo'} removed.`, 'success');
+        } catch (err) {
+            showMessage('Failed to remove photo.', 'error');
         }
     };
 
@@ -160,7 +227,7 @@ const ArtistDashboard = () => {
         const stats = [
             { label: 'Total Pieces', value: artworks.length.toString(), icon: <TrendingUp />, trend: 'Active' },
             { label: 'Published Works', value: artworks.filter(a => a.status === 'active').length.toString(), icon: <CheckCircle size={18} />, trend: 'Live' },
-            { label: 'Portfolio Value', value: '₹' + artworks.filter(a => a.status === 'active').reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(), icon: <DollarSign />, trend: 'Estimated' },
+            { label: 'Portfolio Value', value: '₹' + artworks.filter(a => a.status === 'active').reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(), icon: <span style={{fontSize: '20px', fontWeight: 800}}>₹</span>, trend: 'Estimated' },
         ];
 
         return (
@@ -334,7 +401,10 @@ const ArtistDashboard = () => {
                                             {art.status === 'draft' ? 'Draft' : 'Published'}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 24px', fontWeight: 700 }}>₹{art.price?.toLocaleString() || 0}</td>
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <div style={{ fontWeight: 700 }}>₹{art.price ? Math.floor(Number(art.price)).toLocaleString() : '0'}</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-light)' }}>Earn: ₹{art.price ? Math.floor(Number(art.price) * 0.9).toLocaleString() : '0'} after 10% platform fee</div>
+                                    </td>
                                     <td style={{ padding: '16px 24px', color: 'var(--text-gray)', fontSize: '14px' }}>{new Date(art.createdAt).toLocaleDateString()}</td>
                                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
@@ -361,7 +431,7 @@ const ArtistDashboard = () => {
                     <p style={{ color: 'var(--text-gray)' }}>{editingId ? 'Update your masterpiece details.' : 'Share your latest masterpiece with the global art community.'}</p>
                 </div>
                 {editingId && (
-                    <button onClick={() => { setEditingId(null); setUploadData({ title: '', description: '', category: 'Digital Art', price: '' }); setImageFile(null); }} className="btn-secondary" style={{ padding: '10px 20px', fontSize: '14px' }}>
+                    <button onClick={() => { setEditingId(null); setUploadData({ title: '', description: '', category: '', price: '' }); setImageFile(null); setExistingImage(null); }} className="btn-secondary" style={{ padding: '10px 20px', fontSize: '14px' }}>
                         Cancel Edit
                     </button>
                 )}
@@ -370,17 +440,17 @@ const ArtistDashboard = () => {
             <form onSubmit={handleUpload} className="upload-form" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '40px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* Drag n Drop area */}
-                    <div style={{ position: 'relative', border: '2px dashed #DDD', borderRadius: '16px', padding: imageFile ? '0px' : '60px 20px', textAlign: 'center', background: 'var(--bg-cream)', transition: 'all 0.3s ease', overflow: 'hidden', minHeight: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        {imageFile ? (
+                    <div style={{ position: 'relative', border: '2px dashed #DDD', borderRadius: '16px', padding: (imageFile || existingImage) ? '0px' : '60px 20px', textAlign: 'center', background: 'var(--bg-cream)', transition: 'all 0.3s ease', overflow: 'hidden', height: '350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {(imageFile || existingImage) ? (
                             <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex' }}>
-                                <img src={URL.createObjectURL(imageFile)} alt="Preview" style={{ width: '100%', minHeight: '350px', objectFit: 'cover', display: 'block' }} />
-                                <div style={{ position: 'absolute', bottom: '16px', right: '16px', display: 'flex', gap: '12px' }}>
-                                    <button type="button" onClick={() => setImageFile(null)} style={{ padding: '10px 20px', background: '#EF4444', color: 'white', fontWeight: 600, borderRadius: '8px', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', border: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <X size={16} /> Remove
-                                    </button>
-                                    <label htmlFor="fileUpload" style={{ padding: '10px 20px', background: 'white', color: 'var(--text-dark)', fontWeight: 600, borderRadius: '8px', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', display: 'block' }}>
-                                        Change Image
+                                <img src={imageFile ? URL.createObjectURL(imageFile) : existingImage} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                                <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', gap: '8px' }}>
+                                    <label htmlFor="fileUpload" style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.9)', color: 'var(--text-dark)', fontSize: '13px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', display: 'block' }}>
+                                        Change
                                     </label>
+                                    <button type="button" onClick={() => {setImageFile(null); setExistingImage(null);}} style={{ width: '32px', height: '32px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', borderRadius: '8px', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', border: 'none', display: 'flex', alignItems: 'center', justifyItems: 'center', padding: '8px' }}>
+                                        <X size={16} />
+                                    </button>
                                 </div>
                                 <input type="file" onChange={(e) => setImageFile(e.target.files[0])} accept="image/*" style={{ display: 'none' }} id="fileUpload" />
                             </div>
@@ -412,15 +482,12 @@ const ArtistDashboard = () => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Category</label>
-                                <select value={uploadData.category} onChange={e => setUploadData({ ...uploadData, category: e.target.value })} style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px' }}>
-                                    <option>Digital Art</option>
-                                    <option>Paintings</option>
-                                    <option>3D Art</option>
-                                    <option>Photography</option>
-                                    <option>Illustrations</option>
-                                    <option>Abstract</option>
-                                    <option>Other</option>
-                                </select>
+                                <input list="category-options" value={uploadData.category} onChange={e => setUploadData({ ...uploadData, category: e.target.value })} style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} placeholder="Select or type category..." required />
+                                <datalist id="category-options">
+                                    {['HandWork', 'Pencil Sketch', 'Canvas Painting', 'Sheet Painting', 'Glass Painting', ...new Set(artworks.map(a => a.category))].filter(Boolean).map((cat, i) => (
+                                        <option key={i} value={cat}></option>
+                                    ))}
+                                </datalist>
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Price (INR)</label>
@@ -453,10 +520,10 @@ const ArtistDashboard = () => {
                     )}{uploadSuccess && <div style={{ padding: '12px', background: '#D1FAE5', color: '#047857', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', textAlign: 'center', fontWeight: 600 }}>{uploadSuccess}</div>}
 
                     <button disabled={uploading} type="submit" className="btn-primary" style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: 700, marginBottom: '16px', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', border: 'none', cursor: uploading ? 'not-allowed' : 'pointer', opacity: uploading ? 0.7 : 1 }}>
-                        {uploading ? <Loader2 className="animate-spin" size={24} style={{ margin: '0 auto' }} /> : (editingId ? 'UPDATE ARTWORK' : 'PUBLISH ARTWORK')}
+                        {uploading ? <Loader2 className="animate-spin" size={24} style={{ margin: '0 auto' }} /> : (editingId && artworks.find(a => a._id === editingId)?.status === 'active' ? 'UPDATE ARTWORK' : 'PUBLISH ARTWORK')}
                     </button>
-                    <button type="button" onClick={handleSaveDraft} disabled={uploading} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: 600, background: 'white', border: '1px solid #EEE', cursor: uploading ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-md)', color: 'var(--text-dark)', transition: 'var(--transition-smooth)', display: 'block' }} onMouseOver={(e) => { e.currentTarget.style.background = '#F9FAFB'; e.currentTarget.style.borderColor = '#DDD' }} onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#EEE' }}>
-                        {artworks.find(a => a._id === editingId)?.status === 'draft' || !editingId ? 'Save as Draft' : 'Switch to Draft'}
+                    <button type="button" onClick={handleSecondaryAction} disabled={uploading} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: 600, background: 'white', border: '1px solid #EEE', cursor: uploading ? 'not-allowed' : 'pointer', borderRadius: 'var(--radius-md)', color: 'var(--text-dark)', transition: 'var(--transition-smooth)', display: 'block' }} onMouseOver={(e) => { e.currentTarget.style.background = '#F9FAFB'; e.currentTarget.style.borderColor = '#DDD' }} onMouseOut={(e) => { e.currentTarget.style.background = 'white'; e.currentTarget.style.borderColor = '#EEE' }}>
+                        {editingId && artworks.find(a => a._id === editingId)?.status === 'draft' ? 'Update Draft' : (!editingId ? 'Save as Draft' : 'Switch to Draft')}
                     </button>
                 </div>
             </form>
@@ -470,91 +537,102 @@ const ArtistDashboard = () => {
                 <p style={{ color: 'var(--text-gray)' }}>Manage your profile, account preferences, and notification settings.</p>
             </header>
 
-            <section style={{ marginBottom: '48px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Profile</h3>
-                <div style={{ display: 'flex', gap: '40px', alignItems: 'flex-start' }}>
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '40px', fontWeight: 'bold', marginBottom: '16px', margin: '0 auto', position: 'relative' }}>
-                            {user.name.charAt(0)}
-                            <div style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', padding: '6px', borderRadius: '50%', border: '2px solid #EEE', color: 'var(--text-gray)', cursor: 'pointer' }}>
-                                <FileImage size={16} />
+            <form onSubmit={handleSaveSettings}>
+                <section style={{ marginBottom: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Profile & Branding</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start' }}>
+                        {/* Profile Photo */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '40px', fontWeight: 'bold', marginBottom: '16px', margin: '0 auto', position: 'relative', overflow: 'hidden' }}>
+                                {(avatarFile || user.avatar) ? <img src={avatarFile ? URL.createObjectURL(avatarFile) : user.avatar} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : user.name.charAt(0)}
+                                <label htmlFor="avatarInput" style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', padding: '6px', borderRadius: '50%', border: '2px solid #EEE', color: 'var(--text-gray)', cursor: 'pointer' }}>
+                                    <FileImage size={16} />
+                                </label>
+                            </div>
+                            <input type="file" id="avatarInput" hidden onChange={e => setAvatarFile(e.target.files[0])} />
+                            <span onClick={() => document.getElementById('avatarInput').click()} style={{ color: 'var(--primary-coral)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>Change Avatar</span>
+                            {user.avatar && <p onClick={() => handleRemovePhoto('avatar')} style={{ fontSize: '11px', color: '#EF4444', marginTop: '4px', cursor: 'pointer' }}>Remove Photo</p>}
+                        </div>
+
+                        {/* Brand Logo */}
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ width: '120px', height: '120px', borderRadius: '12px', background: '#F3F4F6', border: '2px dashed #DDD', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '14px', fontWeight: 'bold', marginBottom: '16px', margin: '0 auto', position: 'relative', overflow: 'hidden' }}>
+                                {(logoFile || user.brandLogo) ? <img src={logoFile ? URL.createObjectURL(logoFile) : user.brandLogo} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : 'Brand Logo'}
+                                <label htmlFor="logoInput" style={{ position: 'absolute', bottom: '0', right: '0', background: 'white', padding: '6px', borderRadius: '50%', border: '2px solid #EEE', color: 'var(--text-gray)', cursor: 'pointer' }}>
+                                    <Plus size={16} />
+                                </label>
+                            </div>
+                            <input type="file" id="logoInput" hidden onChange={e => setLogoFile(e.target.files[0])} />
+                            <span onClick={() => document.getElementById('logoInput').click()} style={{ color: 'var(--soft-purple)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>Artist Brand Logo</span>
+                            {user.brandLogo && <p onClick={() => handleRemovePhoto('brandLogo')} style={{ fontSize: '11px', color: '#EF4444', marginTop: '4px', cursor: 'pointer' }}>Remove Logo</p>}
+                        </div>
+
+                        <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Display Name</label>
+                                <input type="text" value={settingsData.name} onChange={e => setSettingsData({ ...settingsData, name: e.target.value })} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none' }} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Bio</label>
+                                <textarea rows="4" value={settingsData.bio} onChange={e => setSettingsData({ ...settingsData, bio: e.target.value })} placeholder="Brief description for your profile. This is public." style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', resize: 'vertical' }}></textarea>
                             </div>
                         </div>
-                        <span style={{ color: 'var(--primary-coral)', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>Change Avatar</span>
-                        <p style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '4px' }}>JPG, GIF or PNG. Max size 800K</p>
                     </div>
+                </section>
 
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <section style={{ marginBottom: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Account Settings</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Display Name</label>
-                            <input type="text" defaultValue={user.name} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none' }} />
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Email Address</label>
+                            <input type="email" defaultValue={user.email} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', background: '#F9FAFB' }} readOnly />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Bio</label>
-                            <textarea rows="4" placeholder="Brief description for your profile. This is public." style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', resize: 'vertical' }}></textarea>
-                            <p style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '8px', fontStyle: 'italic' }}>Brief description for your profile. This is public.</p>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Password</label>
+                            <input type="password" defaultValue="••••••••••••" style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', background: '#F9FAFB' }} readOnly />
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section style={{ marginBottom: '48px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Account</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Email Address</label>
-                        <input type="email" defaultValue={user.email} style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', background: '#F9FAFB' }} readOnly />
+                <section style={{ marginBottom: '48px' }}>
+                    <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Notifications</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            <div style={{ padding: '8px', background: 'var(--soft-purple-light)', color: 'var(--soft-purple)', borderRadius: '8px' }}><Bell size={20} /></div>
+                            <div style={{ flex: 1 }}>
+                                <h4 style={{ fontSize: '15px', fontWeight: 600 }}>Order Updates</h4>
+                                <p style={{ fontSize: '13px', color: 'var(--text-gray)' }}>Notify me when my artwork is purchased or delivered.</p>
+                            </div>
+                            <div style={{ width: '40px', height: '24px', background: 'var(--primary-coral)', borderRadius: '12px', position: 'relative', cursor: 'pointer' }}>
+                                <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            <div style={{ padding: '8px', background: '#FFF0ED', color: 'var(--primary-coral)', borderRadius: '8px' }}><Heart size={20} /></div>
+                            <div style={{ flex: 1 }}>
+                                <h4 style={{ fontSize: '15px', fontWeight: 600 }}>Art Engagement</h4>
+                                <p style={{ fontSize: '13px', color: 'var(--text-gray)' }}>Receive an alert when your artwork gets featured or liked.</p>
+                            </div>
+                            <div style={{ width: '40px', height: '24px', background: 'var(--primary-coral)', borderRadius: '12px', position: 'relative', cursor: 'pointer' }}>
+                                <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Current Password</label>
-                        <input type="password" defaultValue="••••••••••••" style={{ width: '100%', padding: '14px', borderRadius: '8px', border: '1px solid #EEE', outline: 'none', background: '#F9FAFB' }} readOnly />
-                    </div>
-                </div>
-                <div style={{ background: '#F9FAFB', border: '1px solid #EEE', padding: '20px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <h4 style={{ fontSize: '15px', fontWeight: 600 }}>Change Password</h4>
-                        <p style={{ fontSize: '13px', color: 'var(--text-gray)' }}>Regularly updating your password keeps your account secure.</p>
-                    </div>
-                    <button style={{ padding: '8px 24px', background: 'white', border: '1px solid #DDD', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>Update</button>
-                </div>
-            </section>
+                </section>
 
-            <section style={{ marginBottom: '48px' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Notifications</h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                        <div style={{ padding: '8px', background: 'var(--soft-purple-light)', color: 'var(--soft-purple)', borderRadius: '8px' }}><Bell size={20} /></div>
-                        <div style={{ flex: 1 }}>
-                            <h4 style={{ fontSize: '15px', fontWeight: 600 }}>New Comments</h4>
-                            <p style={{ fontSize: '13px', color: 'var(--text-gray)' }}>Notify me when someone comments on my projects.</p>
-                        </div>
-                        <div style={{ width: '40px', height: '24px', background: 'var(--primary-coral)', borderRadius: '12px', position: 'relative', cursor: 'pointer' }}>
-                            <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                        <div style={{ padding: '8px', background: '#FFF0ED', color: 'var(--primary-coral)', borderRadius: '8px' }}><Heart size={20} /></div>
-                        <div style={{ flex: 1 }}>
-                            <h4 style={{ fontSize: '15px', fontWeight: 600 }}>Project Likes</h4>
-                            <p style={{ fontSize: '13px', color: 'var(--text-gray)' }}>Receive an alert when your artwork gets featured or liked.</p>
-                        </div>
-                        <div style={{ width: '40px', height: '24px', background: 'var(--primary-coral)', borderRadius: '12px', position: 'relative', cursor: 'pointer' }}>
-                            <div style={{ width: '20px', height: '20px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', right: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}></div>
-                        </div>
-                    </div>
+                <section style={{ border: '1px solid #FEE2E2', background: '#FEF2F2', padding: '24px', borderRadius: '12px', marginTop: '40px' }}>
+                    <h4 style={{ color: '#EF4444', fontWeight: 700, marginBottom: '8px', fontSize: '16px' }}>Danger Zone</h4>
+                    <p style={{ color: '#EF4444', fontSize: '14px', marginBottom: '20px', opacity: 0.8 }}>Once you delete your account, there is no going back. Please be certain.</p>
+                    <button type="button" style={{ padding: '10px 24px', background: 'white', border: '1px solid #EF4444', color: '#EF4444', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' }}>Delete Account</button>
+                </section>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '40px', borderTop: '1px solid #EEE', paddingTop: '24px' }}>
+                    <button type="button" onClick={() => setActiveTab('dashboard')} style={{ padding: '12px 24px', fontWeight: 600, color: 'var(--text-gray)', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
+                    <button disabled={savingSettings} type="submit" className="btn-primary" style={{ padding: '12px 32px', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', border: 'none' }}>
+                        {savingSettings ? 'Saving...' : 'Save Changes'}
+                    </button>
                 </div>
-            </section>
-
-            <section style={{ border: '1px solid #FEE2E2', background: '#FEF2F2', padding: '24px', borderRadius: '12px', marginTop: '40px' }}>
-                <h4 style={{ color: '#EF4444', fontWeight: 700, marginBottom: '8px', fontSize: '16px' }}>Danger Zone</h4>
-                <p style={{ color: '#EF4444', fontSize: '14px', marginBottom: '20px', opacity: 0.8 }}>Once you delete your account, there is no going back. Please be certain.</p>
-                <button style={{ padding: '10px 24px', background: 'white', border: '1px solid #EF4444', color: '#EF4444', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' }}>Delete Account</button>
-            </section>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '40px', borderTop: '1px solid #EEE', paddingTop: '24px' }}>
-                <button style={{ padding: '12px 24px', fontWeight: 600, color: 'var(--text-gray)', background: 'none', border: 'none', cursor: 'pointer' }}>Cancel</button>
-                <button className="btn-primary" style={{ padding: '12px 32px', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', border: 'none' }}>Save Changes</button>
-            </div>
+            </form>
         </motion.div>
     );
 
@@ -646,6 +724,36 @@ const ArtistDashboard = () => {
                                 <button onClick={confirmDelete} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#EF4444', color: 'white', fontWeight: 600 }}>Delete</button>
                             </div>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Custom Dashboard Notification Toast */}
+            <AnimatePresence>
+                {notification.show && (
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        style={{
+                            position: 'fixed',
+                            bottom: '40px',
+                            right: '40px',
+                            zIndex: 10000,
+                            background: notification.type === 'success' ? '#10B981' : '#EF4444',
+                            color: 'white',
+                            padding: '16px 24px',
+                            borderRadius: '12px',
+                            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            fontWeight: 600,
+                            minWidth: '280px'
+                        }}
+                    >
+                        {notification.type === 'success' ? <CheckCircle size={20} /> : <X size={20} />}
+                        {notification.message}
                     </motion.div>
                 )}
             </AnimatePresence>

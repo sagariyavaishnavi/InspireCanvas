@@ -7,8 +7,8 @@
   --primary-coral-dark: #3721A8;
   --accent-yellow: #B155FF;
   /* Violet substitution */
-  --highlight-green: #00F0FF;
-  /* Sci-fi cyan highlight substitution */
+  --highlight-green: #7C3AED;
+  /* Deep Violet substitution */
   --text-dark: #0A042B;
   --text-gray: #5F568C;
   --text-light: #A59DBF;
@@ -128,6 +128,13 @@ button {
   padding: 24px 0;
 }
 
+@media (max-width: 600px) {
+  .grid-artwork {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
 /* --- Responsive Design System --- */
 
 /* Tablet & Smaller Laptops */
@@ -197,7 +204,18 @@ button {
   }
 
   .hero-grid h1 {
-    font-size: 36px !important;
+    font-size: 32px !important;
+    margin: 0 auto 24px !important;
+    max-width: 90%;
+  }
+
+  .hero-grid p {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .hero-buttons {
+    justify-content: center !important;
   }
 
   .category-grid {
@@ -220,16 +238,44 @@ button {
   .footer-grid {
     grid-template-columns: 1fr 1fr !important;
   }
+
+  .promo-grid {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    gap: 40px !important;
+  }
+
+  .promo-grid h2 {
+    font-size: 36px !important;
+  }
 }
 
 /* Small Mobile */
 @media (max-width: 600px) {
   .navbar-container {
-    justify-content: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px !important;
   }
 
   .navbar-logo span {
+    display: none;
+  }
+
+  .nav-user-name, .nav-auth-buttons .btn-secondary {
     display: none !important;
+  }
+
+  .nav-actions {
+    gap: 12px !important;
+  }
+
+  .nav-user-info {
+    gap: 4px !important;
+  }
+
+  .nav-user-info div {
+    width: 32px !important;
+    height: 32px !important;
   }
 
   .footer-grid {

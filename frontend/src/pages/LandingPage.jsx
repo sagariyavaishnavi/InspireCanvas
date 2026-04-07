@@ -31,10 +31,10 @@ const LandingPage = () => {
     }, []);
 
     const categories = [
-        { name: 'Illustrations', icon: <Zap color="#6D5BFF" />, color: '#EBE8FF' },
-        { name: 'Photography', icon: <Users color="#FF7F66" />, color: '#FFF0ED' },
-        { name: '3D Art', icon: <Shield color="#4ADE80" />, color: '#E9FAF0' },
-        { name: 'Digital Art', icon: <Zap color="#FFCF52" />, color: '#FFF9E6' },
+        { name: 'HandWork', icon: <Zap color="#6D5BFF" />, color: '#EBE8FF' },
+        { name: 'Pencil Sketch', icon: <Users color="#FF7F66" />, color: '#FFF0ED' },
+        { name: 'Canvas Painting', icon: <Shield color="#4ADE80" />, color: '#E9FAF0' },
+        { name: 'Glass Painting', icon: <Zap color="#FFCF52" />, color: '#FFF9E6' },
     ];
 
     return (
@@ -57,12 +57,12 @@ const LandingPage = () => {
                         </span>
                         <h1 style={{ fontSize: '64px', lineHeight: 1.1, marginBottom: '24px' }}>
                             Discover the Best <br />
-                            <span className="gradient-text">Digital Art</span>
+                            <span className="gradient-text">Draw Art</span>
                         </h1>
                         <p style={{ fontSize: '18px', color: 'var(--text-gray)', marginBottom: '40px', maxWidth: '500px' }}>
-                            Experience a curated collection of breathtaking digital masterpieces from world-class creators. Buy, sell, and discover unique digital assets.
+                            Experience a curated collection of breathtaking hand-drawn masterpieces from world-class creators. Buy, sell, and discover unique drawings.
                         </p>
-                        <div style={{ display: 'flex', gap: '16px', justifyContent: 'inherit', flexWrap: 'wrap' }}>
+                        <div className="hero-buttons" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                             <Link to="/explore" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '16px 32px' }}>
                                 Explore Gallery <ArrowRight size={20} />
                             </Link>
@@ -70,38 +70,78 @@ const LandingPage = () => {
                                 Start Creating
                             </Link>
                         </div>
-                        <div style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ display: 'flex' }}>
-                                {[1, 2, 3].map(i => (
-                                    <img key={i} src={`https://i.pravatar.cc/40?img=${i + 10}`} style={{ width: '40px', height: '40px', borderRadius: '50%', border: '3px solid white', marginLeft: i > 1 ? '-12px' : '0' }} />
-                                ))}
-                            </div>
-                            <p style={{ fontSize: '14px', color: 'var(--text-gray)' }}>
-                                Trusted by <span style={{ fontWeight: 700, color: 'var(--text-dark)' }}>2,500+</span> artists worldwide
-                            </p>
-                        </div>
                     </motion.div>
 
                     <motion.div
-                        initial={{ x: 50, opacity: 0 }}
-                        animate={{ x: 0, opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        style={{ position: 'relative' }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1 }}
+                        style={{ position: 'relative', height: '500px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
-                        <img
-                            src="https://images.unsplash.com/photo-1633167606207-d840b5070fc2?auto=format&fit=crop&q=80&w=1000"
-                            style={{ width: '100%', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }}
-                            alt="Featured Art"
-                        />
-                        <div className="glass" style={{ position: 'absolute', bottom: '24px', left: '-40px', padding: '20px', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '16px', boxShadow: 'var(--shadow-premium)' }}>
-                            <div style={{ background: 'var(--highlight-green)', padding: '10px', borderRadius: 'var(--radius-sm)' }}>
-                                <Zap color="white" />
-                            </div>
-                            <div>
-                                <p style={{ fontSize: '12px', color: 'var(--text-gray)' }}>Current Volume</p>
-                                <p style={{ fontSize: '18px', fontWeight: 800 }}>$5.2B+</p>
-                            </div>
-                        </div>
+                        {/* 1. Underlying Oil Canvas (Vibrant Painting choice) */}
+                        <motion.div
+                            animate={{ rotate: [-2, 2, -2], y: [0, -10, 0] }}
+                            transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                            style={{
+                                position: 'absolute',
+                                top: '5%',
+                                left: '-5%',
+                                width: '70%',
+                                height: '80%',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
+                                boxShadow: 'var(--shadow-lg)',
+                                zIndex: 1,
+                                border: '12px solid #fff',
+                                transform: 'rotate(-5deg)'
+                            }}
+                        >
+                            <img src="https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=1000" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Vibrant Painting Layer 1" />
+                        </motion.div>
+
+                        {/* 2. Side-Stacked Oil Canvas (Unique Brushwork choice) */}
+                        <motion.div
+                            animate={{ rotate: [3, -3, 3], x: [0, 15, 0] }}
+                            transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
+                            style={{
+                                position: 'absolute',
+                                bottom: '5%',
+                                right: '-5%',
+                                width: '70%',
+                                height: '80%',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
+                                boxShadow: 'var(--shadow-lg)',
+                                zIndex: 2,
+                                border: '12px solid #fff',
+                                transform: 'rotate(6deg)'
+                            }}
+                        >
+                            <img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&q=80&w=1000" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Dynamic Painting Layer 2" />
+                        </motion.div>
+
+                        {/* 3. Main Featured Oil Masterpiece */}
+                        <motion.div
+                            whileHover={{ scale: 1.05, zIndex: 10, rotate: 0 }}
+                            style={{
+                                width: '75%',
+                                height: '85%',
+                                borderRadius: '4px',
+                                overflow: 'hidden',
+                                boxShadow: 'var(--shadow-premium)',
+                                zIndex: 5,
+                                border: '14px solid #fff',
+                                transform: 'rotate(-2deg)',
+                                transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <img
+                                src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=1000"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                alt="Main Painting Piece"
+                            />
+                        </motion.div>
                     </motion.div>
                 </div>
             </section>
@@ -136,7 +176,7 @@ const LandingPage = () => {
                                     <div style={{ position: 'relative', height: '280px' }}>
                                         <img src={art.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700 }}>
-                                            ₹{art.price}
+                                            ₹{Math.floor(Number(art.price)).toLocaleString()}
                                         </div>
                                     </div>
                                     <div style={{ padding: '20px' }}>
@@ -179,7 +219,55 @@ const LandingPage = () => {
                 </div>
             </section>
 
+            <section className="promo-section" style={{ padding: '80px 0', background: 'var(--text-dark)', color: 'white', overflow: 'hidden', position: 'relative' }}>
+                <div className="container">
+                    <div className="promo-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '60px', alignItems: 'center' }}>
+                        <div>
+                            <span style={{ color: 'var(--accent-yellow)', fontWeight: 700, textTransform: 'uppercase', fontSize: '14px', letterSpacing: '2px', display: 'block', marginBottom: '16px' }}>For Creators</span>
+                            <h2 style={{ fontSize: '48px', color: 'white', marginBottom: '24px', lineHeight: 1.1 }}>Join the World's Elite <span style={{ color: 'var(--primary-coral)' }}>Hand-Work</span> Artists</h2>
+                            <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.7)', marginBottom: '40px', lineHeight: 1.6 }}>
+                                Showcase your masterpieces to a global audience of high-end collectors. We handle the logistics, you focus on the art.
+                            </p>
+                            <Link to="/register" className="btn-primary" style={{ padding: '18px 40px', fontSize: '16px', background: 'var(--primary-coral)', border: 'none', boxShadow: '0 10px 20px rgba(79, 56, 214, 0.4)' }}>
+                                Become a Verified Artist
+                            </Link>
+                        </div>
+                        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px' }}>
+                            {/* Panel 1 */}
+                            <motion.div
+                                animate={{ y: [0, -15, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                style={{ width: '100px', height: '400px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                            >
+                                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=500" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} alt="Panel 1" />
+                            </motion.div>
+                            
+                            {/* Panel 2 */}
+                            <motion.div
+                                animate={{ y: [0, -25, 0] }}
+                                transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+                                style={{ width: '120px', height: '450px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', marginTop: '-25px' }}
+                            >
+                                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=500" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center' }} alt="Panel 2" />
+                            </motion.div>
+
+                            {/* Panel 3 */}
+                            <motion.div
+                                animate={{ y: [0, -15, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut", delay: 0.2 }}
+                                style={{ width: '100px', height: '400px', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
+                            >
+                                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=500" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center' }} alt="Panel 3" />
+                            </motion.div>
+                            
+                            <div style={{ position: 'absolute', bottom: '-40px', right: '-40px', width: '250px', height: '250px', borderRadius: '50%', background: 'var(--soft-purple)', filter: 'blur(100px)', opacity: 0.2, zIndex: -1 }}></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* How it Works */}
+
             <section id="how-it-works" style={{ padding: '100px 0', background: 'white' }}>
                 <div className="container">
                     <div style={{ textAlign: 'center', marginBottom: '80px' }}>
@@ -196,7 +284,7 @@ const LandingPage = () => {
                                 <h3>For Artists</h3>
                             </div>
                             {[
-                                { step: '01', title: 'Create & Upload', desc: 'Set up your profile and upload your digital masterpieces with ease.' },
+                                { step: '01', title: 'Create & Upload', desc: 'Set up your profile and upload your hand-drawn masterpieces with ease.' },
                                 { step: '02', title: 'Set Your Terms', desc: 'Decide between auctions or fixed prices and set your loyalty rates.' },
                                 { step: '03', title: 'Grow Your Audience', desc: 'Engage with a global community of collectors and enthusiasts.' }
                             ].map((item, i) => (
@@ -216,7 +304,7 @@ const LandingPage = () => {
                                 <h3>For Buyers</h3>
                             </div>
                             {[
-                                { step: '01', title: 'Discover Unique Art', desc: 'Browse through thousands of exclusive digital assets from around the world.' },
+                                { step: '01', title: 'Discover Unique Art', desc: 'Browse through thousands of exclusive drawings from around the world.' },
                                 { step: '02', title: 'Secure Purchase', desc: 'Transaction safety guaranteed via blockchain-verified contracts.' },
                                 { step: '03', title: 'Build Collection', desc: 'Showcase your acquired pieces in your personal virtual gallery.' }
                             ].map((item, i) => (
