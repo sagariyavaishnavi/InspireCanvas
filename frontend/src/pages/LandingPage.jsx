@@ -45,7 +45,7 @@ const LandingPage = () => {
             className="landing-page"
         >
             {/* Hero Section */}
-            <section style={{ padding: '80px 0', overflow: 'hidden' }}>
+            <section className="page-container" style={{ overflow: 'hidden' }}>
                 <div className="container hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: '60px' }}>
                     <motion.div
                         initial={{ x: -50, opacity: 0 }}
@@ -76,6 +76,7 @@ const LandingPage = () => {
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 1 }}
+                        className="hero-image-container"
                         style={{ position: 'relative', height: '500px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                     >
                         {/* 1. Underlying Oil Canvas (Vibrant Painting choice) */}

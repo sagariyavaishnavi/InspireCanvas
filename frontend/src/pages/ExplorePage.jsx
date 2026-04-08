@@ -43,8 +43,8 @@ const ExplorePage = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container"
-            style={{ padding: '40px 0', minHeight: '80vh' }}
+            className="container page-container"
+            style={{ minHeight: '80vh' }}
         >
             <div style={{ marginBottom: '60px', textAlign: 'center' }}>
                 <h1 style={{ fontSize: '48px', marginBottom: '16px' }}>Explore the <span className="gradient-text">Gallery</span></h1>

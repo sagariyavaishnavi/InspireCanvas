@@ -9,11 +9,14 @@ import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ArtistDashboard from './pages/ArtistDashboard';
+import WishlistPage from './pages/WishlistPage';
+import ScrollToTop from './components/ScrollToTop';
 import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
     return (
         <div className="app">
+            <ScrollToTop />
             <Navbar />
             <main>
                 <AnimatePresence mode="wait">
@@ -26,6 +29,7 @@ function App() {
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/checkout" element={<CheckoutPage />} />
                         <Route path="/dashboard" element={<ArtistDashboard />} />
+                        <Route path="/wishlist" element={<WishlistPage />} />
                     </Routes>
                 </AnimatePresence>
             </main>

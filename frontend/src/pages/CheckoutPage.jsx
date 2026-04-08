@@ -90,14 +90,14 @@ const CheckoutPage = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container"
-            style={{ padding: '60px 0', minHeight: '80vh' }}
+            className="container checkout-container"
+            style={{ minHeight: '80vh' }}
         >
             <Link to="/cart" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-gray)', marginBottom: '32px', fontSize: '14px', fontWeight: 600 }}>
                 <ArrowLeft size={16} /> Back to Cart
             </Link>
 
-            <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '60px' }}>
+            <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 0.7fr)', gap: '40px' }}>
                 {/* Checkout Form */}
                 <div>
                     <h1 style={{ fontSize: '36px', marginBottom: '40px' }}>Checkout</h1>
@@ -110,7 +110,7 @@ const CheckoutPage = () => {
                                 <h3 style={{ fontSize: '20px' }}>Billing Information</h3>
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            <div className="checkout-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                 <div style={{ gridColumn: 'span 2' }}>
                                     <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--text-gray)' }}>Full Name</label>
                                     <input type="text" value={checkoutDetails.name} onChange={(e) => setCheckoutDetails({ ...checkoutDetails, name: e.target.value })} placeholder="John Doe" style={{ width: '100%', padding: '14px 20px', borderRadius: 'var(--radius-sm)', border: '1px solid #EEE', background: '#F9FAFB', outline: 'none' }} required />
@@ -265,6 +265,7 @@ const CheckoutPage = () => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 20 }}
                         exit={{ opacity: 0, y: -20 }}
+                        className="notification-toast"
                         style={{
                             position: 'fixed',
                             top: '20px',
@@ -281,7 +282,8 @@ const CheckoutPage = () => {
                             gap: '12px',
                             fontWeight: 600,
                             minWidth: '300px',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            textAlign: 'center'
                         }}
                     >
                         {notification.type === 'success' ? <CheckCircle size={20} /> : <X size={20} />}

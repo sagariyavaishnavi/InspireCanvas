@@ -55,12 +55,12 @@ const Footer = () => {
                     </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '40px', display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '13px' }}>
-                    <p>© 2024 InspireCanvas Inc. All rights reserved.</p>
-                    <div style={{ display: 'flex', gap: '24px' }}>
-                        <a href="#">Privacy Policy</a>
-                        <a href="#">Terms of Service</a>
-                        <a href="#">Cookies</a>
+                <div className="footer-bottom" style={{ borderTop: '1px solid #eee', paddingTop: '40px', display: 'flex', justifyContent: 'space-between', color: '#999', fontSize: '13px' }}>
+                    <p style={{ margin: 0 }}>© 2024 InspireCanvas Inc. All rights reserved.</p>
+                    <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                        <a href="#" style={{ whiteSpace: 'nowrap' }}>Privacy Policy</a>
+                        <a href="#" style={{ whiteSpace: 'nowrap' }}>Terms of Service</a>
+                        <a href="#" style={{ whiteSpace: 'nowrap' }}>Cookies</a>
                     </div>
                 </div>
             </div>

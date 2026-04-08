@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Palette, Search, LogOut, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, Palette, Search, LogOut, LayoutDashboard, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
 
@@ -47,10 +47,15 @@ const Navbar = () => {
                         />
                     </div>
 
-                    <Link to="/cart" style={{ position: 'relative' }}>
-                        <ShoppingCart size={24} />
-                        {cartCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-coral)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '50%' }}>{cartCount}</span>}
-                    </Link>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <Link to="/wishlist" style={{ color: 'var(--text-dark)' }}>
+                            <Heart size={24} />
+                        </Link>
+                        <Link to="/cart" style={{ position: 'relative', color: 'var(--text-dark)' }}>
+                            <ShoppingCart size={24} />
+                            {cartCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-coral)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '50%' }}>{cartCount}</span>}
+                        </Link>
+                    </div>
 
                     {user ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

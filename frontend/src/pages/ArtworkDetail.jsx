@@ -9,6 +9,8 @@ const ArtworkDetail = () => {
     const navigate = useNavigate();
     const [artwork, setArtwork] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isWishlisted, setIsWishlisted] = useState(false);
+    const [shareNotification, setShareNotification] = useState(false);
 
     useEffect(() => {
         const fetchArtwork = async () => {
@@ -23,6 +25,13 @@ const ArtworkDetail = () => {
         };
         fetchArtwork();
     }, [id]);
+
+    useEffect(() => {
+        if (artwork) {
+            const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            setIsWishlisted(wishlist.some(item => item._id === artwork._id));
+        }
+    }, [artwork]);
 
     const handleAddToCart = () => {
         if (!artwork) return;
@@ -39,6 +48,39 @@ const ArtworkDetail = () => {
         localStorage.setItem('cart', JSON.stringify(currentCart));
         window.dispatchEvent(new Event('storage'));
         navigate('/cart');
+    };
+
+    const toggleWishlist = () => {
+        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+        let newWishlist;
+        if (isWishlisted) {
+            newWishlist = wishlist.filter(item => item._id !== artwork._id);
+        } else {
+            newWishlist = [...wishlist, artwork];
+        }
+        localStorage.setItem('wishlist', JSON.stringify(newWishlist));
+        setIsWishlisted(!isWishlisted);
+        window.dispatchEvent(new Event('storage'));
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: artwork.title,
+            text: `Check out this amazing artwork: ${artwork.title} by ${artwork.artist?.name}`,
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                setShareNotification(true);
+                setTimeout(() => setShareNotification(false), 3000);
+            }
+        } catch (err) {
+            console.error('Error sharing:', err);
+        }
     };
 
     if (loading) {
@@ -62,10 +104,9 @@ const ArtworkDetail = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container"
-            style={{ padding: '60px 0' }}
+            className="container page-container"
         >
-            <div className="artwork-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: '60px', alignItems: 'start' }}>
+            <div className="artwork-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 0.8fr)', gap: '40px', alignItems: 'start' }}>
                 {/* Left: Image Section */}
                 <div>
                     <motion.div
@@ -80,16 +121,28 @@ const ArtworkDetail = () => {
                 {/* Right: Details Section */}
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <span style={{ background: '#E9FAF0', color: '#10B981', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase' }}>
+                        <span style={{ background: '#E9FAF0', color: '#10B981', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                             {artwork.category || 'HandWork'}
                         </span>
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <button style={{ padding: '8px', borderRadius: '50%', background: 'white', border: '1px solid #EEE', cursor: 'pointer' }}><Heart size={20} color="var(--primary-coral)" /></button>
-                            <button onClick={() => navigator.clipboard.writeText(window.location.href)} style={{ padding: '8px', borderRadius: '50%', background: 'white', border: '1px solid #EEE', cursor: 'pointer' }}><Share2 size={20} /></button>
+                        <div style={{ display: 'flex', gap: '12px', position: 'relative' }}>
+                            <button 
+                                onClick={toggleWishlist}
+                                style={{ padding: '8px', borderRadius: '50%', background: 'white', border: '1px solid #EEE', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: isWishlisted ? 'var(--primary-coral)' : '#666', transition: 'all 0.3s ease' }}
+                            >
+                                <Heart size={20} fill={isWishlisted ? 'var(--primary-coral)' : 'none'} />
+                            </button>
+                            <button onClick={handleShare} style={{ padding: '8px', borderRadius: '50%', background: 'white', border: '1px solid #EEE', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Share2 size={20} />
+                            </button>
+                            {shareNotification && (
+                                <div style={{ position: 'absolute', top: '-40px', right: 0, background: 'var(--text-dark)', color: 'white', padding: '4px 12px', borderRadius: '8px', fontSize: '12px', whiteSpace: 'nowrap' }}>
+                                    Link copied!
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    <h1 style={{ fontSize: '48px', marginBottom: '8px', wordBreak: 'break-word' }}>{artwork.title}</h1>
+                    <h1 className="detail-title" style={{ fontSize: '48px', marginBottom: '8px', wordBreak: 'break-word' }}>{artwork.title}</h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
                         <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', overflow: 'hidden' }}>
                             {artwork.artist?.avatar ? <img src={artwork.artist.avatar} style={{width:'100%', height:'100%', objectFit:'cover'}} /> : (artwork.artist?.name ? artwork.artist.name.charAt(0).toUpperCase() : 'U')}
@@ -104,7 +157,7 @@ const ArtworkDetail = () => {
                         </div>
                     </div>
 
-                    <div className="glass" style={{ padding: '32px', borderRadius: 'var(--radius-md)', marginBottom: '32px', background: 'var(--bg-cream)' }}>
+                    <div className="glass detail-price-card" style={{ padding: '32px', borderRadius: 'var(--radius-md)', marginBottom: '32px', background: 'var(--bg-cream)' }}>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '8px' }}>
                             <span style={{ fontSize: '36px', fontWeight: 800 }}>₹{artwork.price ? Math.floor(Number(artwork.price)).toLocaleString() : '0'}</span>
                         </div>

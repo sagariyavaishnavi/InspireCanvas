@@ -242,7 +242,7 @@ const ArtistDashboard = () => {
                     </button>
                 </header>
 
-                <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
+                <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
                     {stats.map((stat, i) => (
                         <div
                             key={i}
@@ -437,7 +437,7 @@ const ArtistDashboard = () => {
                 )}
             </header>
 
-            <form onSubmit={handleUpload} className="upload-form" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '40px' }}>
+            <form onSubmit={handleUpload} className="upload-form-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '40px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     {/* Drag n Drop area */}
                     <div style={{ position: 'relative', border: '2px dashed #DDD', borderRadius: '16px', padding: (imageFile || existingImage) ? '0px' : '60px 20px', textAlign: 'center', background: 'var(--bg-cream)', transition: 'all 0.3s ease', overflow: 'hidden', height: '350px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
@@ -479,7 +479,7 @@ const ArtistDashboard = () => {
                             <textarea value={uploadData.description} onChange={e => setUploadData({ ...uploadData, description: e.target.value })} required rows="5" placeholder="Tell the story behind this artwork..." style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px', resize: 'vertical' }}></textarea>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div className="upload-form-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Category</label>
                                 <input list="category-options" value={uploadData.category} onChange={e => setUploadData({ ...uploadData, category: e.target.value })} style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} placeholder="Select or type category..." required />
@@ -540,7 +540,7 @@ const ArtistDashboard = () => {
             <form onSubmit={handleSaveSettings}>
                 <section style={{ marginBottom: '48px' }}>
                     <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '24px' }}>Profile & Branding</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start' }}>
+                    <div className="settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', alignItems: 'flex-start' }}>
                         {/* Profile Photo */}
                         <div style={{ textAlign: 'center' }}>
                             <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '40px', fontWeight: 'bold', marginBottom: '16px', margin: '0 auto', position: 'relative', overflow: 'hidden' }}>
