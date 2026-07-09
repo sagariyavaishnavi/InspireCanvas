@@ -46,11 +46,11 @@ const CartPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="container"
-            style={{ padding: '60px 0', minHeight: '80vh' }}
+            style={{ padding: '60px 24px', minHeight: '80vh' }}
         >
             <h1 style={{ fontSize: '42px', marginBottom: '40px' }}>Your <span className="gradient-text">Art Cart</span></h1>
 
-            <div className="cart-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: '40px' }}>
+            <div className="cart-grid">
                 {/* Cart Items List */}
                 <div>
                     {cartItems.length > 0 ? (
@@ -60,7 +60,7 @@ const CartPage = () => {
                                     <button onClick={() => removeItem(item._id)} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' }}>
                                         <X size={18} />
                                     </button>
-                                    <img src={item.image} style={{ width: '120px', height: '120px', borderRadius: '12px', objectFit: 'cover' }} />
+                                    <img src={item.image} className="cart-item-image" style={{ width: '120px', height: '120px', borderRadius: '12px', objectFit: 'cover' }} />
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                         <div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>

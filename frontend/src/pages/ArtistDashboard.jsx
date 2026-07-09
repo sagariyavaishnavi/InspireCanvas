@@ -23,23 +23,33 @@ import {
     Loader2,
     Heart,
     Plus,
-    X
+    X,
+    Home,
+    ShoppingCart
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 const ArtistDashboard = () => {
+    const { user, logout, updateUserData } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [artworks, setArtworks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deletableId, setDeletableId] = useState(null);
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
-    const { user, logout, updateUserData } = useAuth();
-    const navigate = useNavigate();
 
     // Upload Form State
-    const [uploadData, setUploadData] = useState({ title: '', description: '', category: 'Digital Art', price: '' });
+    const [uploadData, setUploadData] = useState({ title: '', category: 'HandWork', price: '' });
+    const [artSize, setArtSize] = useState('11 x 14 in / 28 x 35 cm');
+    const [artMaterial, setArtMaterial] = useState('');
+    const [artSubject, setArtSubject] = useState('');
+    const [artMedium, setArtMedium] = useState('');
+    const [artShape, setArtShape] = useState('Rectangle');
+    const [artAvailability, setArtAvailability] = useState('Available');
+    const [artAbout, setArtAbout] = useState('');
+
     const [imageFile, setImageFile] = useState(null);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState('');
@@ -89,17 +99,32 @@ const ArtistDashboard = () => {
         }
     };
 
+    const fetchBuyerOrders = async () => {
+        try {
+            const res = await api.get('/orders/my-orders');
+            setBuyerOrders(res.data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const submitArtwork = async (status = 'active') => {
         setUploading(true);
         setUploadError('');
         setUploadSuccess('');
         try {
+            const descriptionString = `TYPE: Original Artist Work\nSIZE: ${artSize || '11 x 14 in / 28 x 35 cm'}\nMATERIAL: ${artMaterial || ''}\nARTIST: ${user?.name || ''}\nCATEGORY: ${uploadData.category || ''}\nSUBJECT: ${artSubject || ''}\nMEDIUM: ${artMedium || ''}\nSHAPE: ${artShape || ''}\nAVAILABILITY: ${artAvailability || ''}\n\nABOUT THE ARTWORK:\n${artAbout || ''}`;
+
             const formData = new FormData();
             formData.append('title', uploadData.title);
-            formData.append('description', uploadData.description);
+            formData.append('description', descriptionString);
             formData.append('category', uploadData.category);
             formData.append('price', Number(uploadData.price));
-            formData.append('status', status);
+            const resolvedStatus = status === 'draft' ? 'draft' : 
+                (artAvailability === 'Not Available' || artAvailability === 'Sold') ? 'sold' : 'active';
+            formData.append('status', resolvedStatus);
             if (imageFile) {
                 formData.append('image', imageFile);
             }
@@ -119,7 +144,14 @@ const ArtistDashboard = () => {
                 setUploadSuccess('');
                 setActiveTab('manage');
                 fetchMyArtworks();
-                setUploadData({ title: '', description: '', category: 'Digital Art', price: '' });
+                setUploadData({ title: '', category: 'HandWork', price: '' });
+                setArtSize('11 x 14 in / 28 x 35 cm');
+                setArtMaterial('');
+                setArtSubject('');
+                setArtMedium('');
+                setArtShape('Rectangle');
+                setArtAvailability('Available');
+                setArtAbout('');
                 setImageFile(null);
                 setEditingId(null);
                 setExistingImage(null);
@@ -137,7 +169,7 @@ const ArtistDashboard = () => {
     };
 
     const handleSecondaryAction = () => {
-        if (!uploadData.title || !uploadData.description || !uploadData.price) {
+        if (!uploadData.title || !artAbout || !uploadData.price) {
             setUploadError('Please fill missing fields before saving a draft.');
             return;
         }
@@ -146,12 +178,32 @@ const ArtistDashboard = () => {
 
     const handleEdit = (art) => {
         setEditingId(art._id);
+        
+        // Try parsing description parameters
+        const getVal = (label) => {
+            const regex = new RegExp(`^${label}:\\s*(.*)$`, 'm');
+            const match = art.description ? art.description.match(regex) : null;
+            return match ? match[1].trim() : '';
+        };
+
+        const aboutRegex = /ABOUT THE ARTWORK:\s*([\s\S]*)$/;
+        const aboutMatch = art.description ? art.description.match(aboutRegex) : null;
+        const parsedAbout = aboutMatch ? aboutMatch[1].trim() : (art.description || '');
+
         setUploadData({
             title: art.title,
-            description: art.description,
             category: art.category,
             price: art.price
         });
+        
+        setArtSize(getVal('SIZE') || '11 x 14 in / 28 x 35 cm');
+        setArtMaterial(getVal('MATERIAL'));
+        setArtSubject(getVal('SUBJECT'));
+        setArtMedium(getVal('MEDIUM'));
+        setArtShape(getVal('SHAPE') || 'Rectangle');
+        setArtAvailability(getVal('AVAILABILITY') || 'Available');
+        setArtAbout(parsedAbout);
+
         setExistingImage(art.image);
         // Note: For editing, we don't automatically download the file back to the input, 
         // we'll treat a null imageFile as "don't change the existing photo"
@@ -159,7 +211,7 @@ const ArtistDashboard = () => {
     };
 
     const handleSaveDraft = () => {
-        if (!uploadData.title || !uploadData.description || !uploadData.price) {
+        if (!uploadData.title || !artAbout || !uploadData.price) {
             setUploadError('Please fill missing fields to save a Draft.');
             return;
         }
@@ -182,6 +234,18 @@ const ArtistDashboard = () => {
         } catch (err) {
             console.error(err);
             showMessage('Failed to delete artwork.', 'error');
+        }
+    };
+
+    const toggleAvailability = async (art) => {
+        try {
+            const newStatus = art.status === 'active' ? 'sold' : 'active';
+            await api.put(`/artworks/${art._id}`, { status: newStatus });
+            showMessage(`Drawing marked as ${newStatus === 'active' ? 'Available' : 'Not Available'}!`, 'success');
+            fetchMyArtworks();
+        } catch (err) {
+            console.error(err);
+            showMessage('Failed to update availability.', 'error');
         }
     };
 
@@ -227,7 +291,8 @@ const ArtistDashboard = () => {
         const stats = [
             { label: 'Total Pieces', value: artworks.length.toString(), icon: <TrendingUp />, trend: 'Active' },
             { label: 'Published Works', value: artworks.filter(a => a.status === 'active').length.toString(), icon: <CheckCircle size={18} />, trend: 'Live' },
-            { label: 'Portfolio Value', value: '₹' + artworks.filter(a => a.status === 'active').reduce((acc, curr) => acc + (curr.price || 0), 0).toLocaleString(), icon: <span style={{fontSize: '20px', fontWeight: 800}}>₹</span>, trend: 'Estimated' },
+            { label: 'Sold Artworks', value: artworks.filter(a => a.status === 'sold').length.toString(), icon: <ImageIcon size={18} />, trend: 'Completed' },
+            { label: 'Total Earnings', value: '₹' + artworks.filter(a => a.status === 'sold').reduce((acc, curr) => acc + (curr.price || 0) * 0.9, 0).toLocaleString(), icon: <span style={{fontSize: '20px', fontWeight: 800}}>₹</span>, trend: 'Net Profit' },
         ];
 
         return (
@@ -242,12 +307,13 @@ const ArtistDashboard = () => {
                     </button>
                 </header>
 
-                <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
+                <div className="dashboard-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px', marginBottom: '48px' }}>
                     {stats.map((stat, i) => (
                         <div
                             key={i}
                             onClick={() => {
                                 if (stat.trend === 'Live' || stat.label === 'Published Works') setStatusFilter('active');
+                                else if (stat.trend === 'Completed' || stat.label === 'Sold Artworks') setStatusFilter('sold');
                                 else if (stat.trend === 'Active' || stat.label === 'Total Pieces') setStatusFilter('All');
                                 setActiveTab('manage');
                             }}
@@ -260,12 +326,12 @@ const ArtistDashboard = () => {
                                 <div style={{ background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', padding: '10px', borderRadius: '12px', backgroundClip: 'text', border: '1px solid #eee' }}>
                                     {stat.icon}
                                 </div>
-                                <span style={{ color: 'var(--highlight-green)', background: '#E9FAF0', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700 }}>
+                                <span style={{ color: stat.trend === 'Completed' || stat.trend === 'Net Profit' ? '#10B981' : 'var(--highlight-green)', background: stat.trend === 'Completed' || stat.trend === 'Net Profit' ? '#E9FAF0' : '#E9FAF0', padding: '4px 10px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700 }}>
                                     {stat.trend}
                                 </span>
                             </div>
                             <p style={{ fontSize: '14px', color: 'var(--text-gray)', marginBottom: '8px' }}>{stat.label}</p>
-                            <h2 style={{ fontSize: '28px' }}>{stat.value}</h2>
+                            <h2 style={{ fontSize: '24px' }}>{stat.value}</h2>
                         </div>
                     ))}
                     {/* Explicit Draft Card for Clickability */}
@@ -285,7 +351,7 @@ const ArtistDashboard = () => {
                             </span>
                         </div>
                         <p style={{ fontSize: '14px', color: 'var(--text-gray)', marginBottom: '8px' }}>Recent Drafts</p>
-                        <h2 style={{ fontSize: '28px' }}>{artworks.filter(a => a.status === 'draft').length}</h2>
+                        <h2 style={{ fontSize: '24px' }}>{artworks.filter(a => a.status === 'draft').length}</h2>
                     </div>
                 </div>
             </motion.div>
@@ -304,7 +370,7 @@ const ArtistDashboard = () => {
                 </button>
             </header>
 
-            <div className="stats-grid" style={{ display: 'flex', gap: '20px', marginBottom: '32px' }}>
+            <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '32px' }}>
                 <div
                     onClick={() => setStatusFilter('All')}
                     style={{ flex: 1, padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #EEE', display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', borderBottom: statusFilter === 'All' ? '3px solid var(--primary-coral)' : '1px solid #EEE' }}
@@ -324,6 +390,16 @@ const ArtistDashboard = () => {
                     </div>
                     <p style={{ color: 'var(--text-gray)', fontSize: '14px', marginTop: '8px' }}>Active Listings</p>
                     <h3 style={{ fontSize: '24px', fontWeight: 800 }}>{artworks.filter(a => a.status === 'active').length}</h3>
+                </div>
+                <div
+                    onClick={() => setStatusFilter('sold')}
+                    style={{ flex: 1, padding: '24px', background: 'white', borderRadius: '12px', border: '1px solid #EEE', display: 'flex', flexDirection: 'column', gap: '8px', cursor: 'pointer', borderBottom: statusFilter === 'sold' ? '3px solid var(--primary-coral)' : '1px solid #EEE' }}
+                >
+                    <div style={{ background: '#FEE2E2', width: '40px', height: '40px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444' }}>
+                        <TrendingUp size={20} />
+                    </div>
+                    <p style={{ color: 'var(--text-gray)', fontSize: '14px', marginTop: '8px' }}>Sold Pieces</p>
+                    <h3 style={{ fontSize: '24px', fontWeight: 800 }}>{artworks.filter(a => a.status === 'sold').length}</h3>
                 </div>
                 <div
                     onClick={() => setStatusFilter('draft')}
@@ -357,6 +433,7 @@ const ArtistDashboard = () => {
                         >
                             <option value="All">Status: All</option>
                             <option value="active">Active</option>
+                            <option value="sold">Sold</option>
                             <option value="draft">Drafts</option>
                         </select>
                         <button style={{ padding: '8px', background: 'white', border: '1px solid #EEE', borderRadius: 'var(--radius-sm)' }}><Filter size={18} /></button>
@@ -368,6 +445,8 @@ const ArtistDashboard = () => {
                             <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>ARTWORK</th>
                             <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>STATUS</th>
                             <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>PRICE</th>
+                            <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>SALES COUNT</th>
+                            <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>AVAILABILITY</th>
                             <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600 }}>DATE ADDED</th>
                             <th style={{ padding: '16px 24px', fontSize: '12px', color: 'var(--text-gray)', fontWeight: 600, textAlign: 'right' }}>ACTIONS</th>
                         </tr>
@@ -390,20 +469,44 @@ const ArtistDashboard = () => {
                                     </td>
                                     <td style={{ padding: '16px 24px' }}>
                                         <span style={{
-                                            background: art.status === 'draft' ? '#FEF3C7' : '#E9FAF0',
-                                            color: art.status === 'draft' ? '#D97706' : '#10B981',
+                                            background: art.status === 'draft' ? '#FEF3C7' : art.status === 'sold' ? '#FEE2E2' : '#E9FAF0',
+                                            color: art.status === 'draft' ? '#D97706' : art.status === 'sold' ? '#EF4444' : '#10B981',
                                             padding: '4px 10px',
                                             borderRadius: '12px',
                                             fontSize: '11px',
                                             fontWeight: 600,
                                             textTransform: 'capitalize'
                                         }}>
-                                            {art.status === 'draft' ? 'Draft' : 'Published'}
+                                            {art.status === 'draft' ? 'Draft' : art.status === 'sold' ? 'Sold' : 'Published'}
                                         </span>
                                     </td>
                                     <td style={{ padding: '16px 24px' }}>
                                         <div style={{ fontWeight: 700 }}>₹{art.price ? Math.floor(Number(art.price)).toLocaleString() : '0'}</div>
-                                        <div style={{ fontSize: '11px', color: 'var(--text-light)' }}>Earn: ₹{art.price ? Math.floor(Number(art.price) * 0.9).toLocaleString() : '0'} after 10% platform fee</div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-light)' }}>Earn: ₹{art.price ? Math.floor(Number(art.price) * 0.9).toLocaleString() : '0'}</div>
+                                    </td>
+                                    <td style={{ padding: '16px 24px', fontWeight: 700, fontSize: '14px', color: 'var(--text-dark)' }}>
+                                        {art.salesCount || 0} sold
+                                    </td>
+                                    <td style={{ padding: '16px 24px' }}>
+                                        {art.status === 'draft' ? (
+                                            <span style={{ color: 'var(--text-light)', fontSize: '12px' }}>Draft (N/A)</span>
+                                        ) : (
+                                            <button 
+                                                onClick={() => toggleAvailability(art)}
+                                                style={{
+                                                    padding: '6px 12px',
+                                                    borderRadius: '8px',
+                                                    background: art.status === 'sold' ? '#FEE2E2' : '#E9FAF0',
+                                                    color: art.status === 'sold' ? '#EF4444' : '#10B981',
+                                                    border: 'none',
+                                                    fontWeight: 700,
+                                                    fontSize: '11px',
+                                                    cursor: 'pointer'
+                                                }}
+                                            >
+                                                {art.status === 'sold' ? '🔴 Set Available' : '🟢 Set Not Available'}
+                                            </button>
+                                        )}
                                     </td>
                                     <td style={{ padding: '16px 24px', color: 'var(--text-gray)', fontSize: '14px' }}>{new Date(art.createdAt).toLocaleDateString()}</td>
                                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
@@ -431,7 +534,19 @@ const ArtistDashboard = () => {
                     <p style={{ color: 'var(--text-gray)' }}>{editingId ? 'Update your masterpiece details.' : 'Share your latest masterpiece with the global art community.'}</p>
                 </div>
                 {editingId && (
-                    <button onClick={() => { setEditingId(null); setUploadData({ title: '', description: '', category: '', price: '' }); setImageFile(null); setExistingImage(null); }} className="btn-secondary" style={{ padding: '10px 20px', fontSize: '14px' }}>
+                    <button onClick={() => { 
+                        setEditingId(null); 
+                        setUploadData({ title: '', category: 'HandWork', price: '' }); 
+                        setArtSize('11 x 14 in / 28 x 35 cm');
+                        setArtMaterial('');
+                        setArtSubject('');
+                        setArtMedium('');
+                        setArtShape('Rectangle');
+                        setArtAvailability('Available');
+                        setArtAbout('');
+                        setImageFile(null); 
+                        setExistingImage(null); 
+                    }} className="btn-secondary" style={{ padding: '10px 20px', fontSize: '14px' }}>
                         Cancel Edit
                     </button>
                 )}
@@ -470,32 +585,73 @@ const ArtistDashboard = () => {
                     </div>
 
                     <div style={{ background: 'white', padding: '32px', borderRadius: '16px', border: '1px solid #EEE' }}>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Artwork Title</label>
-                            <input value={uploadData.title} onChange={e => setUploadData({ ...uploadData, title: e.target.value })} required type="text" placeholder="Give your piece a name..." style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} />
-                        </div>
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Description</label>
-                            <textarea value={uploadData.description} onChange={e => setUploadData({ ...uploadData, description: e.target.value })} required rows="5" placeholder="Tell the story behind this artwork..." style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px', resize: 'vertical' }}></textarea>
-                        </div>
-
-                        <div className="upload-form-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Category</label>
-                                <input list="category-options" value={uploadData.category} onChange={e => setUploadData({ ...uploadData, category: e.target.value })} style={{ width: '100%', padding: '16px', borderRadius: '8px', border: 'none', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} placeholder="Select or type category..." required />
-                                <datalist id="category-options">
-                                    {['HandWork', 'Pencil Sketch', 'Canvas Painting', 'Sheet Painting', 'Glass Painting', ...new Set(artworks.map(a => a.category))].filter(Boolean).map((cat, i) => (
-                                        <option key={i} value={cat}></option>
-                                    ))}
-                                </datalist>
+                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Artwork Title</label>
+                                <input value={uploadData.title} onChange={e => setUploadData({ ...uploadData, title: e.target.value })} required type="text" placeholder="Give your piece a name..." style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} />
                             </div>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Price (INR)</label>
-                                <div style={{ display: 'flex', alignItems: 'center', background: '#F9FAFB', borderRadius: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', background: '#F9FAFB', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
                                     <span style={{ padding: '0 16px', color: 'var(--text-gray)', fontWeight: 600 }}>₹</span>
                                     <input value={uploadData.price} onChange={e => setUploadData({ ...uploadData, price: e.target.value })} required type="number" min="0" placeholder="0.00" style={{ width: '100%', padding: '16px 16px 16px 0', border: 'none', background: 'transparent', outline: 'none', fontSize: '15px' }} />
                                 </div>
                             </div>
+                        </div>
+
+                        <div style={{ marginBottom: '24px', borderTop: '1px solid #EEE', paddingTop: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '16px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Specifications</label>
+                            
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-gray)' }}>Category</label>
+                                <select 
+                                    value={uploadData.category} 
+                                    onChange={e => setUploadData({ ...uploadData, category: e.target.value })} 
+                                    style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px', color: 'var(--text-dark)', cursor: 'pointer' }}
+                                    required
+                                >
+                                    <option value="HandWork">HandWork</option>
+                                    <option value="Pencil Sketch">Pencil Sketch</option>
+                                    <option value="Canvas Painting">Canvas Painting</option>
+                                    <option value="Sheet Painting">Sheet Painting</option>
+                                    <option value="Glass Painting">Glass Painting</option>
+                                </select>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-gray)' }}>Size</label>
+                                    <input value={artSize} onChange={e => setArtSize(e.target.value)} required type="text" placeholder="e.g. 11 x 14 in / 28 x 35 cm" style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-gray)' }}>Material</label>
+                                    <input value={artMaterial} onChange={e => setArtMaterial(e.target.value)} required type="text" placeholder="e.g. Canvas, Paper, Wood, Glass" style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-gray)' }}>Medium</label>
+                                    <input value={artMedium} onChange={e => setArtMedium(e.target.value)} required type="text" placeholder="e.g. Acrylic, Charcoal, Oil Paint, Pencil" style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px' }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-gray)' }}>Shape & Subject</label>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                                        <select value={artShape} onChange={e => setArtShape(e.target.value)} style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '14px', cursor: 'pointer' }}>
+                                            <option value="Rectangle">Rectangle</option>
+                                            <option value="Square">Square</option>
+                                            <option value="Circle">Circle</option>
+                                            <option value="Oval">Oval</option>
+                                        </select>
+                                        <input value={artSubject} onChange={e => setArtSubject(e.target.value)} required type="text" placeholder="e.g. Landscape, Abstract" style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '14px' }} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, marginBottom: '8px', color: 'var(--text-dark)', textTransform: 'uppercase' }}>Story & Description (About)</label>
+                            <textarea value={artAbout} onChange={e => setArtAbout(e.target.value)} required rows="5" placeholder="Tell the inspiration or story behind this artwork..." style={{ width: '100%', padding: '16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: '#F9FAFB', outline: 'none', fontSize: '15px', resize: 'vertical' }}></textarea>
                         </div>
                     </div>
                 </div>
@@ -652,7 +808,7 @@ const ArtistDashboard = () => {
                         { id: 'manage', label: 'Manage Artworks', icon: <FileImage size={20} /> },
                         { id: 'upload', label: 'Upload Artwork', icon: <UploadIcon size={20} /> },
                         { id: 'divider', isDivider: true },
-                        { id: 'settings', label: 'Settings', icon: <SettingsIcon size={20} /> },
+                        { id: 'settings', label: 'Settings', icon: <SettingsIcon size={20} /> }
                     ].map((item, index) => {
                         if (item.isDivider) {
                             return (

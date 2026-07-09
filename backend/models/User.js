@@ -18,7 +18,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide a password'],
         minlength: 8,
-        maxlength: 16,
         select: false
     },
     role: {
@@ -37,6 +36,26 @@ const userSchema = new mongoose.Schema({
     bio: {
         type: String,
         maxlength: 500
+    },
+    resetPasswordOTP: {
+        type: String,
+        default: undefined
+    },
+    resetPasswordOTPExpires: {
+        type: Date,
+        default: undefined
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationOTP: {
+        type: String,
+        default: undefined
+    },
+    verificationOTPExpires: {
+        type: Date,
+        default: undefined
     },
     createdAt: {
         type: Date,

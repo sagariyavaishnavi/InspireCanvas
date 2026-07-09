@@ -24,6 +24,7 @@ const CheckoutPage = () => {
         paymentMethod: 'card'
     });
     const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+    const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
     const showMessage = (msg, type = 'success') => {
         setNotification({ show: true, message: msg, type });
@@ -35,11 +36,15 @@ const CheckoutPage = () => {
     };
 
     useEffect(() => {
+        if (!user) {
+            navigate('/login?redirect=/checkout');
+            return;
+        }
         const storedDetails = JSON.parse(localStorage.getItem('checkoutDetails'));
         if (storedDetails) {
             setCheckoutDetails((prev) => ({ ...prev, ...storedDetails, name: user?.name || storedDetails.name, email: user?.email || storedDetails.email }));
         }
-    }, [user]);
+    }, [user, navigate]);
 
     useEffect(() => {
         const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -66,8 +71,18 @@ const CheckoutPage = () => {
 
         setIsProcessing(true);
         try {
-            // Fake delay to simulate processing
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Post order to MERN backend
+            await api.post('/orders', {
+                items: cartItems,
+                totalAmount: total,
+                shippingAddress: {
+                    address,
+                    city,
+                    state,
+                    zip,
+                    phone
+                }
+            });
 
             // Clear cart
             localStorage.removeItem('cart');
@@ -76,15 +91,43 @@ const CheckoutPage = () => {
             // Save checkout details for future visits
             localStorage.setItem('checkoutDetails', JSON.stringify(checkoutDetails));
 
-            showMessage('Payment Successful! Thank you for your order. We have sent a confirmation email with the delivery tracking details.', 'success');
-            setTimeout(() => navigate('/'), 3000); 
+            setIsOrderPlaced(true);
         } catch (error) {
             console.error('Checkout error:', error);
-            showMessage('Failed to process payment. Please try again.', 'error');
+            showMessage(error.response?.data?.message || 'Failed to process payment and place order. Please try again.', 'error');
         } finally {
             setIsProcessing(false);
         }
     };
+
+    if (isOrderPlaced) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="container checkout-container"
+                style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 24px' }}
+            >
+                <div className="glass" style={{ background: 'white', padding: '48px', borderRadius: '24px', maxWidth: '500px', width: '100%', textAlign: 'center', border: '1px solid #EEE', boxShadow: 'var(--shadow-md)' }}>
+                    <div style={{ width: '80px', height: '80px', background: '#E9FAF0', color: '#10B981', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                        <CheckCircle size={40} />
+                    </div>
+                    <h1 style={{ fontSize: '28px', fontWeight: 800, marginBottom: '12px', fontFamily: 'Outfit' }}>Order Successful!</h1>
+                    <p style={{ color: 'var(--text-gray)', fontSize: '15px', marginBottom: '36px', lineHeight: '1.6' }}>
+                        Your drawing purchase has been placed successfully. A confirmation summary email has been dispatched.
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <Link to="/my-orders" className="btn-primary" style={{ padding: '14px', textAlign: 'center', background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', border: 'none', fontWeight: 700, display: 'block', textDecoration: 'none' }}>
+                            Visit My Orders
+                        </Link>
+                        <Link to="/explore" className="btn-secondary" style={{ padding: '14px', textAlign: 'center', fontWeight: 600, display: 'block', textDecoration: 'none' }}>
+                            Continue Shopping
+                        </Link>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div

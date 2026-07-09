@@ -121,9 +121,23 @@ const ArtworkDetail = () => {
                 {/* Right: Details Section */}
                 <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <span style={{ background: '#E9FAF0', color: '#10B981', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            {artwork.category || 'HandWork'}
-                        </span>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <span style={{ background: '#EBE8FF', color: 'var(--soft-purple)', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {artwork.category || 'HandWork'}
+                            </span>
+                            <span style={{ 
+                                background: artwork.status === 'sold' ? '#F3F4F6' : '#E9FAF0', 
+                                color: artwork.status === 'sold' ? '#6B7280' : '#10B981', 
+                                padding: '6px 12px', 
+                                borderRadius: 'var(--radius-full)', 
+                                fontSize: '11px', 
+                                fontWeight: 800, 
+                                textTransform: 'uppercase', 
+                                letterSpacing: '0.5px' 
+                            }}>
+                                {artwork.status === 'sold' ? 'Not Available' : 'Available'}
+                            </span>
+                        </div>
                         <div style={{ display: 'flex', gap: '12px', position: 'relative' }}>
                             <button 
                                 onClick={toggleWishlist}
@@ -171,9 +185,15 @@ const ArtworkDetail = () => {
                     </p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <button onClick={handleAddToCart} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'var(--soft-purple)', border: 'none', cursor: 'pointer' }}>
-                            <ShoppingCart size={22} /> Add to Cart
-                        </button>
+                        {artwork.status === 'sold' ? (
+                            <button className="btn-secondary" style={{ width: '100%', padding: '20px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: '#9CA3AF', color: 'white', border: 'none', cursor: 'not-allowed' }} disabled>
+                                Sold / Out of Stock
+                            </button>
+                        ) : (
+                            <button onClick={handleAddToCart} className="btn-primary" style={{ width: '100%', padding: '20px', fontSize: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'var(--soft-purple)', border: 'none', cursor: 'pointer' }}>
+                                <ShoppingCart size={22} /> Add to Cart
+                            </button>
+                        )}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)', gap: '12px', marginTop: '40px' }}>

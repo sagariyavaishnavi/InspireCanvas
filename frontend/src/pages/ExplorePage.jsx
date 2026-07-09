@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, ChevronDown, SlidersHorizontal, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 const ExplorePage = () => {
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchParams] = useSearchParams();
+    const searchParam = searchParams.get('search') || '';
+    const [searchQuery, setSearchQuery] = useState(searchParam);
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [priceRange, setPriceRange] = useState(50000); 
     const [artworks, setArtworks] = useState([]);
     const [categories, setCategories] = useState(['All']);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        setSearchQuery(searchParam);
+    }, [searchParam]);
 
     useEffect(() => {
         const fetchArtworks = async () => {
@@ -43,7 +49,7 @@ const ExplorePage = () => {
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="container page-container"
+            className="container-wide page-container"
             style={{ minHeight: '80vh' }}
         >
             <div style={{ marginBottom: '60px', textAlign: 'center' }}>
@@ -120,6 +126,11 @@ const ExplorePage = () => {
                             <Link to={`/artwork/${art._id}`}>
                                 <div style={{ position: 'relative', height: '320px' }}>
                                     <img src={art.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={art.title} />
+                                    {art.status === 'sold' && (
+                                        <div style={{ position: 'absolute', top: '16px', left: '16px', background: '#EF4444', color: 'white', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, zIndex: 10, textTransform: 'uppercase' }}>
+                                            NOT AVAILABLE
+                                        </div>
+                                    )}
                                     <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.95)', padding: '6px 14px', borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 800, color: 'var(--text-dark)' }}>
                                         ₹{art.price ? Math.floor(Number(art.price)).toLocaleString() : '0'}
                                     </div>
@@ -130,8 +141,11 @@ const ExplorePage = () => {
                             </Link>
                             <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                                 <div>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                                         <h3 style={{ fontSize: '20px' }}>{art.title}</h3>
+                                    </div>
+                                    <div style={{ fontSize: '13px', fontWeight: 600, color: art.status === 'sold' ? '#9CA3AF' : '#10B981', marginBottom: '12px' }}>
+                                        {art.status === 'sold' ? '🔴 Not Available' : '🟢 Available'}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                                         <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'var(--primary-coral)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', overflow: 'hidden' }}>

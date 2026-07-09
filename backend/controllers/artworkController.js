@@ -1,4 +1,5 @@
 const Artwork = require('../models/Artwork');
+const mongoose = require('mongoose');
 
 // Create Artwork
 exports.createArtwork = async (req, res, next) => {
@@ -57,7 +58,7 @@ exports.getArtworks = async (req, res, next) => {
             // the frontend should be able to see everything.
             // We don't filter to 'active' by default if an artist ID is present.
         } else {
-            query.status = 'active';
+            query.status = { $in: ['active', 'sold'] };
         }
 
         if (category && category !== 'All') query.category = category;
@@ -75,7 +76,22 @@ exports.getArtworks = async (req, res, next) => {
         }
 
         const artworks = await Artwork.find(query).populate('artist', 'name email avatar brandLogo');
-        res.status(200).json(artworks);
+        
+        let artworksWithSales = artworks;
+        if (artist) {
+            artworksWithSales = await Promise.all(artworks.map(async (art) => {
+                const Order = mongoose.model('Order');
+                const salesCount = await Order.countDocuments({
+                    'items.artwork': art._id,
+                    status: { $ne: 'cancelled' }
+                });
+                return {
+                    ...art.toObject(),
+                    salesCount
+                };
+            }));
+        }
+        res.status(200).json(artworksWithSales);
     } catch (error) {
         next(error);
     }

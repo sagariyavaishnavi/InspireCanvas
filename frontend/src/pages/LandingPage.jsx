@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Shield, Users, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
+    const { user } = useAuth();
     const [featuredArtworks, setFeaturedArtworks] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -46,7 +48,7 @@ const LandingPage = () => {
         >
             {/* Hero Section */}
             <section className="page-container" style={{ overflow: 'hidden' }}>
-                <div className="container hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: '60px' }}>
+                <div className="container-wide hero-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: '40px' }}>
                     <motion.div
                         initial={{ x: -50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
@@ -63,12 +65,18 @@ const LandingPage = () => {
                             Experience a curated collection of breathtaking hand-drawn masterpieces from world-class creators. Buy, sell, and discover unique drawings.
                         </p>
                         <div className="hero-buttons" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                            <Link to="/explore" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '16px 32px' }}>
-                                Explore Gallery <ArrowRight size={20} />
+                            <Link to="/explore" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '220px', height: '56px', fontSize: '15px', fontWeight: 600, padding: 0 }}>
+                                Explore Gallery
                             </Link>
-                            <Link to="/register" className="btn-secondary" style={{ padding: '16px 32px' }}>
-                                Start Creating
-                            </Link>
+                            {user ? (
+                                <Link to={user.role === 'artist' ? "/dashboard" : "/explore"} className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '220px', height: '56px', fontSize: '15px', fontWeight: 600, padding: 0 }}>
+                                    {user.role === 'artist' ? 'Enter Dashboard' : 'View Gallery'}
+                                </Link>
+                            ) : (
+                                <Link to="/register" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '220px', height: '56px', fontSize: '15px', fontWeight: 600, padding: 0 }}>
+                                    Start Creating
+                                </Link>
+                            )}
                         </div>
                     </motion.div>
 
@@ -148,8 +156,14 @@ const LandingPage = () => {
             </section>
 
             {/* Featured Artworks */}
-            <section style={{ padding: '80px 0' }}>
-                <div className="container">
+            <motion.section 
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ padding: '40px 0' }}
+            >
+                <div className="container-wide">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
                         <div>
                             <h2 style={{ fontSize: '36px', marginBottom: '8px' }}>Featured Artworks</h2>
@@ -161,7 +175,7 @@ const LandingPage = () => {
                     </div>
 
                     {loading ? (
-                        <div style={{ padding: '60px 0', textAlign: 'center' }}>
+                        <div style={{ padding: '40px 0', textAlign: 'center' }}>
                             <Loader2 className="animate-spin" size={40} color="var(--soft-purple)" style={{ animation: 'spin 1s linear infinite', margin: '0 auto' }} />
                             <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }' }} />
                         </div>
@@ -176,12 +190,20 @@ const LandingPage = () => {
                                 >
                                     <div style={{ position: 'relative', height: '280px' }}>
                                         <img src={art.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        {art.status === 'sold' && (
+                                            <div style={{ position: 'absolute', top: '16px', left: '16px', background: '#EF4444', color: 'white', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, zIndex: 10, textTransform: 'uppercase' }}>
+                                                NOT AVAILABLE
+                                            </div>
+                                        )}
                                         <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.9)', padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '12px', fontWeight: 700 }}>
                                             ₹{Math.floor(Number(art.price)).toLocaleString()}
                                         </div>
                                     </div>
                                     <div style={{ padding: '20px' }}>
-                                        <h3 style={{ fontSize: '20px', marginBottom: '4px' }}>{art.title}</h3>
+                                        <h3 style={{ fontSize: '20px', marginBottom: '2px' }}>{art.title}</h3>
+                                        <div style={{ fontSize: '12px', fontWeight: 600, color: art.status === 'sold' ? '#9CA3AF' : '#10B981', marginBottom: '8px' }}>
+                                            {art.status === 'sold' ? '🔴 Not Available' : '🟢 Available'}
+                                        </div>
                                         <p style={{ color: 'var(--text-gray)', fontSize: '14px', marginBottom: '20px' }}>by {art.artist?.name || 'Unknown'}</p>
                                         <Link to={`/artwork/${art._id}`} className="btn-primary" style={{ width: '100%', padding: '12px', background: 'var(--text-dark)', display: 'block', textAlign: 'center' }}>
                                             View Details
@@ -189,18 +211,24 @@ const LandingPage = () => {
                                     </div>
                                 </motion.div>
                             )) : (
-                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 0', color: 'var(--text-gray)' }}>
+                                <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px 0', color: 'var(--text-gray)' }}>
                                     <p>No artworks available at the moment. Check back soon!</p>
                                 </div>
                             )}
                         </div>
                     )}
                 </div>
-            </section>
+            </motion.section>
 
             {/* Browse by Category */}
-            <section style={{ padding: '80px 0', textAlign: 'center' }}>
-                <div className="container">
+            <motion.section 
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                style={{ padding: '40px 0', textAlign: 'center' }}
+            >
+                <div className="container-wide">
                     <h2 style={{ fontSize: '36px', marginBottom: '40px' }}>Browse by Category</h2>
                     <div className="category-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
                         {categories.map((cat, i) => (
@@ -218,11 +246,18 @@ const LandingPage = () => {
                         ))}
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
-            <section className="promo-section" style={{ padding: '80px 0', background: 'var(--text-dark)', color: 'white', overflow: 'hidden', position: 'relative' }}>
-                <div className="container">
-                    <div className="promo-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '60px', alignItems: 'center' }}>
+            <motion.section 
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="promo-section" 
+                style={{ padding: '40px 0', background: 'var(--text-dark)', color: 'white', overflow: 'hidden', position: 'relative' }}
+            >
+                <div className="container-wide">
+                    <div className="promo-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1.2fr)', gap: '40px', alignItems: 'center' }}>
                         <div>
                             <span style={{ color: 'var(--accent-yellow)', fontWeight: 700, textTransform: 'uppercase', fontSize: '14px', letterSpacing: '2px', display: 'block', marginBottom: '16px' }}>For Creators</span>
                             <h2 style={{ fontSize: '48px', color: 'white', marginBottom: '24px', lineHeight: 1.1 }}>Join the World's Elite <span style={{ color: 'var(--primary-coral)' }}>Hand-Work</span> Artists</h2>
@@ -242,7 +277,7 @@ const LandingPage = () => {
                             >
                                 <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=500" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'left center' }} alt="Panel 1" />
                             </motion.div>
-                            
+
                             {/* Panel 2 */}
                             <motion.div
                                 animate={{ y: [0, -25, 0] }}
@@ -260,34 +295,41 @@ const LandingPage = () => {
                             >
                                 <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=500" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center' }} alt="Panel 3" />
                             </motion.div>
-                            
+
                             <div style={{ position: 'absolute', bottom: '-40px', right: '-40px', width: '250px', height: '250px', borderRadius: '50%', background: 'var(--soft-purple)', filter: 'blur(100px)', opacity: 0.2, zIndex: -1 }}></div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* How it Works */}
 
-            <section id="how-it-works" style={{ padding: '100px 0', background: 'white' }}>
-                <div className="container">
-                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+            <motion.section 
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.15 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                id="how-it-works" 
+                style={{ padding: '40px 0', background: 'white' }}
+            >
+                <div className="container-wide">
+                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                         <h2 style={{ fontSize: '42px', marginBottom: '16px' }}>How it Works</h2>
                         <p style={{ color: 'var(--text-gray)', maxWidth: '600px', margin: '0 auto' }}>
                             Whether you are an artist or a collector, getting started is easy and secure.
                         </p>
                     </div>
 
-                    <div className="how-it-works-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px' }}>
+                    <div className="how-it-works-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
                                 <div style={{ background: 'linear-gradient(135deg, var(--primary-coral), var(--soft-purple))', color: 'white', padding: '8px', borderRadius: '8px' }}><Users size={24} /></div>
                                 <h3>For Artists</h3>
                             </div>
                             {[
-                                { step: '01', title: 'Create & Upload', desc: 'Set up your profile and upload your hand-drawn masterpieces with ease.' },
-                                { step: '02', title: 'Set Your Terms', desc: 'Decide between auctions or fixed prices and set your loyalty rates.' },
-                                { step: '03', title: 'Grow Your Audience', desc: 'Engage with a global community of collectors and enthusiasts.' }
+                                { step: '01', title: 'Create & Upload', desc: 'Set up your profile with custom brand logos and upload your creative masterpieces with ease.' },
+                                { step: '02', title: 'Track Earnings', desc: 'Decide fixed prices for your artwork and track your net earnings after a flat 10% platform fee.' },
+                                { step: '03', title: 'Instant Sales Alert', desc: 'Get immediate notification emails the moment a buyer purchases your digital masterpiece.' }
                             ].map((item, i) => (
                                 <div key={i} style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
                                     <span className="gradient-text" style={{ fontSize: '48px', fontWeight: 800, lineHeight: 1 }}>{item.step}</span>
@@ -305,9 +347,9 @@ const LandingPage = () => {
                                 <h3>For Buyers</h3>
                             </div>
                             {[
-                                { step: '01', title: 'Discover Unique Art', desc: 'Browse through thousands of exclusive drawings from around the world.' },
-                                { step: '02', title: 'Secure Purchase', desc: 'Transaction safety guaranteed via blockchain-verified contracts.' },
-                                { step: '03', title: 'Build Collection', desc: 'Showcase your acquired pieces in your personal virtual gallery.' }
+                                { step: '01', title: 'Discover Hand Art', desc: 'Browse through catalog categories of premium sketches, paintings, and drawings.' },
+                                { step: '02', title: 'Secure Checkout', desc: 'Purchase safety guaranteed with multiple options: Card payments, UPI, or Cash on Delivery.' },
+                                { step: '03', title: 'Invoice Notifications', desc: 'Receive immediate detailed email receipts outlining your purchase and tracking details.' }
                             ].map((item, i) => (
                                 <div key={i} style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
                                     <span className="gradient-text" style={{ fontSize: '48px', fontWeight: 800, lineHeight: 1 }}>{item.step}</span>
@@ -320,7 +362,7 @@ const LandingPage = () => {
                         </div>
                     </div>
                 </div>
-            </section>
+            </motion.section>
         </motion.div>
     );
 };

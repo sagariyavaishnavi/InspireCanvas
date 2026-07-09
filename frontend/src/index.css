@@ -23,8 +23,10 @@
 
   /* Border Radius */
   --radius-sm: 8px;
-  --radius-md: 12px; /* reduced from 16 */
-  --radius-lg: 16px; /* reduced from 24 */
+  --radius-md: 12px;
+  /* reduced from 16 */
+  --radius-lg: 16px;
+  /* reduced from 24 */
   --radius-full: 9999px;
 
   /* Transitions */
@@ -35,12 +37,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 *::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
+  /* Chrome, Safari and Opera */
 }
 
 body {
@@ -81,6 +86,18 @@ button {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
+}
+
+.container-wide {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 48px;
+}
+
+@media (max-width: 768px) {
+  .container-wide {
+    padding: 0 20px !important;
+  }
 }
 
 .page-container {
@@ -154,9 +171,9 @@ button {
 
 @media (max-width: 480px) {
   .grid-artwork {
-    gap: 16px !important; 
+    gap: 16px !important;
   }
-  
+
   .grid-artwork .glass {
     padding: 12px !important;
   }
@@ -171,20 +188,20 @@ button {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
-  
+
   .wishlist-grid .glass {
     padding: 8px !important;
   }
-  
+
   .wishlist-grid h3 {
     font-size: 14px !important;
   }
-  
+
   .wishlist-grid p {
     font-size: 12px !important;
     margin-bottom: 8px !important;
   }
-  
+
   .wishlist-grid .btn-primary {
     padding: 6px !important;
     font-size: 11px !important;
@@ -266,7 +283,8 @@ button {
     grid-template-columns: 1fr !important;
     text-align: center;
     gap: 40px !important;
-    padding-bottom: 250px !important; /* Make room for absolute positioned images */
+    padding-bottom: 250px !important;
+    /* Make room for absolute positioned images */
   }
 
   .hero-grid h1 {
@@ -364,7 +382,8 @@ button {
     font-size: 18px;
   }
 
-  .nav-user-name, .nav-auth-buttons .btn-secondary {
+  .nav-user-name,
+  .nav-auth-buttons .btn-secondary {
     display: none !important;
   }
 
@@ -384,7 +403,7 @@ button {
   .footer-grid {
     grid-template-columns: 1fr !important;
     text-align: center !important;
-    gap:30px !important;
+    gap: 30px !important;
   }
 
   .footer-bottom {
@@ -487,7 +506,7 @@ button {
   }
 
   .checkout-container {
-    padding: 16px 20px !important;
+    padding: 40px 20px 60px 20px !important;
   }
 
   .checkout-container h1 {
@@ -558,7 +577,8 @@ button {
   }
 
   .dashboard-content {
-    padding: 32px 16px !important;
+    padding: 32px 16px 100px !important;
+    box-sizing: border-box !important;
   }
 
   .manage-header {
@@ -572,17 +592,31 @@ button {
     overflow-x: auto !important;
   }
 
-  table td, table th {
+  table td,
+  table th {
     padding: 12px 16px !important;
     font-size: 13px !important;
   }
 
-  .upload-form-grid, .settings-grid, .dashboard-stats-grid, .upload-form-details-grid, .checkout-form-grid {
+  .upload-form-grid,
+  .settings-grid,
+  .upload-form-details-grid,
+  .checkout-form-grid {
     grid-template-columns: 1fr !important;
-    gap: 16px !important; /* reduced gap */
+    gap: 16px !important;
+    /* reduced gap */
   }
 
-  .upload-form-grid div, .settings-grid div, .upload-form-details-grid div, .checkout-form-grid div {
+  .stats-grid,
+  .dashboard-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .upload-form-grid div,
+  .settings-grid div,
+  .upload-form-details-grid div,
+  .checkout-form-grid div {
     grid-column: span 1 !important;
   }
 
@@ -605,5 +639,139 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (min-width: 1025px) {
+  .dashboard-container {
+    position: fixed !important;
+    top: 78px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: calc(100vh - 78px) !important;
+    overflow: hidden !important;
+    width: 100% !important;
+  }
+
+  .dashboard-sidebar {
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+
+  .dashboard-content {
+    height: 100% !important;
+    overflow-y: auto !important;
+    padding-bottom: 120px !important;
+    /* leaves cushion space at the bottom */
+    box-sizing: border-box !important;
+  }
+}
+
+/* Mobile & Tablet Specific Responsiveness styling overrides */
+@media (max-width: 1024px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+
+  /* Sidebar non-scrolling 2x2 grid */
+  .sidebar-nav {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding: 16px 20px !important;
+  }
+
+  .nav-divider {
+    display: none !important;
+  }
+
+  .sidebar-nav button,
+  .sidebar-nav a {
+    margin: 0 !important;
+    justify-content: center !important;
+    padding: 12px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    border-right: none !important;
+    border-bottom: 2px solid transparent !important;
+    width: auto !important;
+  }
+
+  .sidebar-nav button.active {
+    border-bottom: 2px solid var(--primary-coral) !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Forms and major action buttons stretch cleanly */
+  .btn-primary,
+  .btn-secondary {
+    width: 100% !important;
+    text-align: center !important;
+  }
+
+  .login-box button,
+  .register-box button,
+  .upload-actions button {
+    width: 100% !important;
+  }
+
+  .upload-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  /* Stack dashboard headers nicely on mobile */
+  .dashboard-container header,
+  .manage-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  .dashboard-container header button,
+  .manage-header button {
+    width: 100% !important;
+  }
+}
+
+/* Desktop spacing for payment / checkout page */
+.checkout-container {
+  padding: 80px 0 120px 0 !important;
+}
+
+/* Responsive layout for the Art Cart page */
+.cart-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 991px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 576px) {
+  .cart-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    padding: 20px !important;
+  }
+  .cart-item-image {
+    width: 100% !important;
+    height: 180px !important;
+    border-radius: 12px !important;
   }
 }
