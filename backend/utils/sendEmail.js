@@ -50,8 +50,12 @@ const sendEmail = async (options) => {
         html: html || message
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`Email successfully sent to ${email} with subject: "${subject}"`);
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Email successfully sent to ${email} with subject: "${subject}"`);
+    } catch (err) {
+        console.error(`Failed to send email to ${email}:`, err.message);
+    }
 };
 
 module.exports = sendEmail;

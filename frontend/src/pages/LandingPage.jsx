@@ -189,7 +189,7 @@ const LandingPage = () => {
                                     style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', transition: 'var(--transition-smooth)' }}
                                 >
                                     <div style={{ position: 'relative', height: '280px' }}>
-                                        <img src={art.image} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={art.image} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={art.title} />
                                         {art.status === 'sold' && (
                                             <div style={{ position: 'absolute', top: '16px', left: '16px', background: '#EF4444', color: 'white', padding: '6px 12px', borderRadius: 'var(--radius-full)', fontSize: '11px', fontWeight: 800, zIndex: 10, textTransform: 'uppercase' }}>
                                                 NOT AVAILABLE
