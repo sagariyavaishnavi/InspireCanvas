@@ -67,7 +67,7 @@ exports.createOrder = async (req, res, next) => {
 
         // 1. Send Order Confirmation Email to Buyer
         try {
-            sendEmail({
+            await sendEmail({
                 email: req.user.email,
                 subject: 'Your InspireCanvas Order Confirmation! 🛒✨',
                 message: `Hi ${req.user.name},\n\nThank you for your purchase! We've received your order.\n\nOrder Details:\nOrder ID: ${order._id}\nItems:\n${itemsListText}\nTotal Amount: ₹${totalAmount.toLocaleString()}\n\nShipping Address:\n${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.zip}\n\nWe will update you once your digital masterpieces are ready.\n\nBest regards,\nThe InspireCanvas Team`,
@@ -126,7 +126,7 @@ exports.createOrder = async (req, res, next) => {
             const netEarnings = artistEarnings * 0.90; // 10% platform fee
 
             try {
-                sendEmail({
+                await sendEmail({
                     email: sale.email,
                     subject: 'Congratulations! Your Artwork has been Sold! 🎉🎨',
                     message: `Hi ${sale.name},\n\nGreat news! Your artwork has been purchased on InspireCanvas.\n\nSold Items:\n${saleItemsText}\nTotal Sale Value: ₹${artistEarnings.toLocaleString()}\nNet Earnings (after 10% platform fee): ₹${netEarnings.toLocaleString()}\n\nBuyer Details:\nName: ${req.user.name}\nEmail: ${req.user.email}\nShipping Address:\n${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.state} - ${shippingAddress.zip}\n\nPlease check your Dashboard for details.\n\nBest regards,\nThe InspireCanvas Team`,

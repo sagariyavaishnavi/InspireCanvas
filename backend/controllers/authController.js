@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
 
         // Send verification email
         try {
-            sendEmail({
+            await sendEmail({
                 email: user.email,
                 subject: 'Verify Your Email Address - InspireCanvas 🎨',
                 message: `Hi ${user.name},\n\nThank you for signing up for InspireCanvas! Please use the following 6-digit verification code (OTP) to verify your account:\n\n${otp}\n\nThis code is valid for 24 hours. If you did not sign up for an account, please ignore this email.`,
@@ -197,7 +197,7 @@ exports.forgotPassword = async (req, res, next) => {
 
         // Send OTP email
         try {
-            sendEmail({
+            await sendEmail({
                 email: user.email,
                 subject: 'Your Password Reset OTP - InspireCanvas 🔒',
                 message: `Hi ${user.name},\n\nYou requested a password reset. Use the following 6-digit verification code (OTP) to reset your password:\n\n${otp}\n\nThis OTP is valid for 10 minutes. If you did not request this, please ignore this email.`,
@@ -266,7 +266,7 @@ exports.resetPassword = async (req, res, next) => {
 
         // Send reset success email
         try {
-            sendEmail({
+            await sendEmail({
                 email: user.email,
                 subject: 'Your Password Has Been Reset Successfully - InspireCanvas 🔒',
                 message: `Hi ${user.name},\n\nYour InspireCanvas account password was successfully reset. You can now log in using your new password.\n\nIf you did not perform this change, please contact support immediately.\n\nBest regards,\nThe InspireCanvas Team`,
@@ -281,7 +281,7 @@ exports.resetPassword = async (req, res, next) => {
                         <p style="font-size: 16px; color: #1f2937;">Hi <strong>${user.name}</strong>,</p>
                         <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">This is confirmation that your account password was successfully reset. You can now log in using your new password.</p>
                         <div style="text-align: center; margin: 36px 0;">
-                            <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/login" style="background-color: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Log In to Your Account</a>
+                            <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/login" style="background-color: #10B981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Log In to Your Account</a>
                         </div>
                         <p style="color: #ef4444; font-size: 14px; line-height: 1.5; font-weight: 600;">If you did not perform this change, please contact support or secure your account immediately.</p>
                         <hr style="border: 0; border-top: 1px solid #f3f4f6; margin-top: 24px; margin-bottom: 16px;" />
@@ -335,7 +335,7 @@ exports.verifyEmail = async (req, res, next) => {
 
         // Send Welcome Email
         try {
-            sendEmail({
+            await sendEmail({
                 email: user.email,
                 subject: 'Welcome to InspireCanvas! 🎉🎨',
                 message: `Hi ${user.name},\n\nYour email has been verified! Welcome to InspireCanvas.\n\nBest regards,\nThe InspireCanvas Team`,
@@ -351,7 +351,7 @@ exports.verifyEmail = async (req, res, next) => {
                         <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">Welcome to InspireCanvas! Your account is now fully active. We are thrilled to have you join our global community of digital art creators and collectors.</p>
                         <p style="font-size: 15px; color: #4b5563; line-height: 1.6;">Start exploring galleries, curating your wishlist, and trading unique digital masterpieces today!</p>
                         <div style="text-align: center; margin: 36px 0;">
-                            <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/login" style="background-color: #FF5A5F; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(255, 90, 95, 0.2);">Log In to Your Account</a>
+                            <a href="${process.env.CLIENT_URL || 'http://localhost:3000'}/login" style="background-color: #FF5A5F; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(255, 90, 95, 0.2);">Log In to Your Account</a>
                         </div>
                         <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">If you have any questions or need assistance, please feel free to reach out to our team at any time.</p>
                         <hr style="border: 0; border-top: 1px solid #f3f4f6; margin-top: 24px; margin-bottom: 16px;" />
@@ -394,7 +394,7 @@ exports.resendVerification = async (req, res, next) => {
 
         // Send verification email
         try {
-            sendEmail({
+            await sendEmail({
                 email: user.email,
                 subject: 'Verify Your Email Address - InspireCanvas 🎨',
                 message: `Hi ${user.name},\n\nThank you for signing up for InspireCanvas! Please use the following 6-digit verification code (OTP) to verify your account:\n\n${otp}\n\nThis code is valid for 24 hours. If you did not sign up for an account, please ignore this email.`,
